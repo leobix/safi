@@ -19,6 +19,7 @@ def get_data():
     df8 = pd.read_csv("2019_S2.csv", sep = ";")
 
     data0 = pd.concat([df0, df1, df2, df3, df4, df5, df6, df7, df8], ignore_index=True)
+    print('read csv semester csv files from 2015s2 to 2019s2')
     return data0
 
 
@@ -42,6 +43,7 @@ def smooth_wind_dir(data):
     data['cos_wind_dir'] = np.cos(2 * np.pi * data['wind_dir'] / 360)
     data['sin_wind_dir'] = np.sin(2 * np.pi * data['wind_dir'] / 360)
     data.drop(['wind_dir'], axis=1, inplace=True)
+    print('smooth wind direction')
     return data
 
 
@@ -57,7 +59,7 @@ def smooth_hour(data):
 
     # concat and update dataframe
     data = pd.concat([data, hour[['cos_hour', 'sin_hour']]], axis=1)
-    #     data.drop(['hour'], axis=1, inplace=True)
+    print('smooth hour')
     return data
 
 
@@ -75,6 +77,8 @@ def smooth_day(data):
     data['cos_day'] = np.cos(2 * np.pi * data['day_delta'] / (365))
     data['sin_day'] = np.sin(2 * np.pi * data['day_delta'] / (365))
     data.drop(['day_delta', 'day'], axis=1, inplace=True)
+
+    print('smooth day')
     return data
 
 
@@ -108,12 +112,13 @@ def generate_daily(df):
     daily = pd.concat([pd.Series(min_speed), pd.Series(min_hour), pd.Series(max_speed), pd.Series(max_hour)], axis=1,
                       keys=['daily_min_speed', 'daily_min_hour', 'daily_max_speed', 'daily_max_hour'])
     daily.set_index(date_range, inplace=True)
-    print('new daily features generated are: %s' % (daily.columns.to_list()))
 
     # #merge new features into dataframe: match with date
     df_out = pd.merge(df, daily, how='outer', left_index=True, right_index=True)
     # fill NaN values with same daily values
     df_out = df_out.fillna(method='ffill')
+
+    print('generate daily features: %s' % (daily.columns.to_list()))
     return df_out
 
 
@@ -126,6 +131,7 @@ def generate_season(df):
     df.loc[df['month'].isin([6, 7, 8]), 'season'] = 3
     df.loc[df['month'].isin([9, 10, 11]), 'season'] = 4
     df.drop(['month'], axis=1, inplace=True)
+    print('generate seasonality categorical feature')
     return df
 
 
@@ -134,6 +140,7 @@ def generate_day_night(df):
     df['night'] = 0
     df.loc[df['hour'].isin([8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]), 'day'] = 1
     df.loc[df['hour'].isin([0, 1, 2, 3, 4, 5, 6, 7, 19, 20, 21, 22, 23]), 'night'] = 1
+    print('generate day/night categorical feature')
     return df
 
 
