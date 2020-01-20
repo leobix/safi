@@ -5,8 +5,8 @@ from pandas import DataFrame
 from pandas import concat
 from datetime import date, datetime, timedelta
 
-#Read data
-# One file per semester
+#STEP 1: Read and Process Masurement Data
+# Read 1 file per semester
 def get_data():
     df0 = pd.read_csv("2015_S2.csv", sep = ";")
     df1 = pd.read_csv("2016_S1.csv", sep = ";")
@@ -42,7 +42,6 @@ def scenario_one_hot(data, one_hot=False):
 def smooth_wind_dir(data):
     data['cos_wind_dir'] = np.cos(2 * np.pi * data['wind_dir'] / 360)
     data['sin_wind_dir'] = np.sin(2 * np.pi * data['wind_dir'] / 360)
-    data.drop(['wind_dir'], axis=1, inplace=True)
     print('smooth wind direction')
     return data
 
@@ -174,3 +173,45 @@ def prepare_data(one_hot=False):
     data = generate_day_night(data)
 
     return data
+
+
+#STEP 2: Merging with Forecast Data
+#get forecast data
+def get_forecast_data():
+    f00 = pd.read_csv("Data/forecast_00.csv")
+    f12 = pd.read_csv("Data/forecast_12.csv")
+    f24 = pd.read_csv("Data/forecast_24.csv")
+    f36 = pd.read_csv("Data/forecast_36.csv")
+    f48 = pd.read_csv("Data/forecast_48.csv")
+    return f00, f12, f24, f36, f48
+
+#Functions to process forecast data
+#convert to datetime index
+def convert_datetime(df):
+    df['datetime'] = pd.to_datetime(df['date'], format='%m/%d/%y %H:%M')
+    df.drop(['date', 'cycle'], axis=1, inplace=True)
+    df.set_index('datetime', inplace=True)
+    return df
+
+#rename columns
+def rename_cols(df):
+    df_out = df.rename(columns={"direction (ｰ)": "wind_dir", "vitesse (m/s)": "speed", "temperature (ｰC)": "temp", "rayonnement (W/m2)": "radiation","precip (mm/h)":"precip"})
+    return df_out
+
+#Function to merge data with forecast data
+def prepare_data_with_forecast(data):
+    #get prepared measurement data
+    data_merge=data.copy()
+    #get forecast data
+    f00, f12, f24, f36, f48 = get_forecast_data()
+    name_str = ['f00', 'f12', 'f24', 'f36', 'f48']
+    i = 0
+    for df in [f00, f12, f24, f36, f48]:
+        df_temp = convert_datetime(df)
+        df_temp = rename_cols(df_temp)
+        data_merge = data_merge.join(df_temp, how='left', rsuffix='_'+name_str[i])
+        i+=1
+    print('merged with forecast data '+ str(name_str))
+    return data_merge
+#data=prepare_data(one_hot=False)
+#data_merge = prepare_data_with_forecast(data)
