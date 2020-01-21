@@ -195,7 +195,9 @@ def convert_datetime(df):
 
 #rename columns
 def rename_cols(df):
-    df_out = df.rename(columns={"direction (ｰ)": "wind_dir", "vitesse (m/s)": "speed", "temperature (ｰC)": "temp", "rayonnement (W/m2)": "radiation","precip (mm/h)":"precip"})
+    df_out = df.rename(columns={"direction (ｰ)": "wind_dir", "vitesse (m/s)": "speed"}) # additional features"temperature (ｰC)": "temp", "rayonnement (W/m2)": "radiation","precip (mm/h)":"precip"
+    #keep just wind_dir and speed features
+    df_out = df_out[['wind_dir','speed']]
     return df_out
 
 #Function to merge data with forecast data
@@ -209,6 +211,7 @@ def prepare_data_with_forecast(data):
     for df in [f00, f12, f24, f36, f48]:
         df_temp = convert_datetime(df)
         df_temp = rename_cols(df_temp)
+        df_temp = smooth_wind_dir(df_temp)
         data_merge = data_merge.join(df_temp, how='left', rsuffix='_'+name_str[i])
         i+=1
     print('merged with forecast data '+ str(name_str))
