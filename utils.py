@@ -114,7 +114,7 @@ def scale_data_RNN(steps_in, steps_out, df, test_size = 0.2):
     return X_train_final, X_test_final, y_train_final, y_test_final, y_test, scaler_X, scaler_y
 
 
-def create_model(X_train, steps_in = 48, steps_out = 48, lr = 1e-3, drop_out = 0, cell1size = 64):
+def create_model(X_train, steps_in = 48, steps_out = 48, lr = 0.001, drop_out = 0, cell1size = 64):
     n_features = X_train.shape[2]
     model2 = Sequential()
     model2.add(LSTM(cell1size, activation='relu', input_shape=(steps_in, n_features)))
@@ -123,6 +123,6 @@ def create_model(X_train, steps_in = 48, steps_out = 48, lr = 1e-3, drop_out = 0
     model2.add(LSTM(cell1size, activation='relu', return_sequences=True))
     model2.add(Dropout(0.5))
     model2.add(TimeDistributed(Dense(3)))#, activation='softmax')))
-    opt = Adam(learning_rate=lr)
+    opt = Adam(learning_rate= lr)
     model2.compile(optimizer=opt, loss='mse')
     return model2
