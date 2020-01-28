@@ -1,23 +1,12 @@
 import pandas as pd
 import numpy as np
 from pandas import read_csv
-from matplotlib import pyplot
-import matplotlib.pyplot as plt
-from pandas.plotting import lag_plot
 from pandas import read_csv
-from matplotlib import pyplot
-from pandas.plotting import autocorrelation_plot
 
 from pandas import read_csv
 from pandas import DataFrame
 from pandas import concat
-from matplotlib import pyplot
 from sklearn.metrics import mean_squared_error
-
-from statsmodels.tsa.ar_model import AR
-from sklearn.metrics import mean_squared_error
-
-from statsmodels.tsa.arima_model import ARIMA
 
 #Time
 from datetime import date, datetime, timedelta
