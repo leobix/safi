@@ -6,7 +6,7 @@ import argparse
 from utils import *
 from data_preperation import * 
 from numpy.random import seed
-from tensorflow import set_random_seed
+import tensorflow as tf
 
 
 
@@ -39,7 +39,7 @@ parser.add_argument("--test_size", type=float, default=0.15,
 def main(args):
 
 	seed(6)
-	set_random_seed(6)
+	tf.random.set_seed(6)	
 	data=prepare_data(one_hot=False)
 	data_merge = prepare_data_with_forecast(data)
 

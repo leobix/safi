@@ -73,7 +73,8 @@ def create_data_RNN(steps_in, steps_out, df):
     X, y = get_past_n_steps(df, steps_in), get_future_n_steps(df, steps_out)
     X2, y2 = np.array(X), np.array(y)
     X3, y3 = X2.reshape(-1, steps_in, X2.shape[1]//(steps_in)), y2.reshape(-1, steps_out, y2.shape[1]//(steps_out))
-    y_from_X = X3[steps_in:,:,:3]
+    y_from_X = X3[steps_in:-2*steps_in,:steps_out,:3]
+    print(y_from_X.shape)
     return X3[:y_from_X.shape[0]], y_from_X
 
 
