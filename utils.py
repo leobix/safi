@@ -22,22 +22,13 @@ from tensorflow.keras.layers import Dropout
 
 from sklearn.model_selection import train_test_split
 from tensorflow.keras.optimizers import Adam
+from numpy.random import seed
 
-from data_preperation import * 
+#from data_preperation import * 
+import tensorflow as tf
 
-
-data=prepare_data(one_hot=False)
-data_merge = prepare_data_with_forecast(data)
-
-
-#select useful columns 
-df= data_merge[['speed', 'cos_wind_dir', 'sin_wind_dir', 'temp', 'radiation', 'precip',
-       'scenario_num', 'cos_hour', 'sin_hour',
-       'cos_day', 'sin_day', 'daily_min_speed', 'daily_min_hour',
-       'daily_max_speed', 'daily_max_hour', 'season', 'day', 'night']]#,
-       #'wind_dir_f00', 'speed_f00', 'cos_wind_dir_f00', 'sin_wind_dir_f00',
-       #'wind_dir_f12', 'speed_f12', 'cos_wind_dir_f12', 'sin_wind_dir_f12',
-       #'wind_dir_f24', 'speed_f24', 'cos_wind_dir_f24', 'sin_wind_dir_f24']]
+seed(6)
+tf.random.set_seed(6)
 
 def get_past_n_steps(df, steps_in):
     df_out = df.copy().add_suffix('_t-'+str(steps_in))
@@ -80,7 +71,7 @@ def create_data_RNN(steps_in, steps_out, df):
 
 
 
-def scale_data_RNN(steps_in, steps_out, df, test_size = 0.2):
+def scale_data_RNN(steps_in, steps_out, df, test_size = 0.2, speed_only = False):
     X, y = create_data_RNN(steps_in, steps_out, df)
     #y = y[:,:,:3]
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, shuffle = False)
@@ -106,6 +97,11 @@ def scale_data_RNN(steps_in, steps_out, df, test_size = 0.2):
     X_test_final = X_test_scaled.transpose(0,1,2)
     y_train_final = y_train_scaled.transpose(0,1,2)
     y_test_final = y_test_scaled.transpose(0,1,2)
+
+    if speed_only:
+        print(y_train_final.shape)
+        y_train_final = y_train_scaled[:,:,0]
+        y_test_final = y_test_scaled[:,:,0]
     
     #X_train_final = X_train_scaled.transpose(0,2,1)
     #X_test_final = X_test_scaled.transpose(0,2,1)
@@ -115,15 +111,52 @@ def scale_data_RNN(steps_in, steps_out, df, test_size = 0.2):
     return X_train_final, X_test_final, y_train_final, y_test_final, y_test, scaler_X, scaler_y
 
 
-def create_model(X_train, steps_in = 48, steps_out = 48, lr = 0.001, drop_out = 0, cell1size = 64):
+def create_model(X_train, steps_in = 48, steps_out = 48, lr = 0.001, drop_out = 0, cell1size = 64, speed_only = False):
     n_features = X_train.shape[2]
-    model2 = Sequential()
-    model2.add(LSTM(cell1size, activation='relu', input_shape=(steps_in, n_features)))
-    model2.add(Dropout(0.5))
-    model2.add(RepeatVector(steps_out))
-    model2.add(LSTM(cell1size, activation='relu', return_sequences=True))
-    model2.add(Dropout(0.5))
-    model2.add(TimeDistributed(Dense(3)))#, activation='softmax')))
+    model = Sequential()
+    model.add(LSTM(cell1size, activation='relu', input_shape=(steps_in, n_features)))
+    model.add(Dropout(0.5))
+    model.add(RepeatVector(steps_out))
+    model.add(LSTM(cell1size, activation='relu', return_sequences=True))
+    model.add(Dropout(0.5))
+    if speed_only:
+        model.add(TimeDistributed(Dense(1)))
+    else:
+        model.add(TimeDistributed(Dense(3)))#, activation='softmax')))
     opt = Adam(learning_rate= lr)
-    model2.compile(optimizer=opt, loss='mse')
-    return model2
+    model.compile(optimizer=opt, loss='mse')
+    return model
+
+def get_baseline_y_test(X_test, steps_out, speed_only):
+    y_baseline = []
+    for i in range(len(X_test)):
+        s = X_test[i,-1,0]
+        c = X_test[i,-1,1]
+        sin = X_test[i,-1,2]
+        if speed_only:
+            y_baseline.append([s for i in range(steps_out)])
+        else:
+            y_baseline.append([[s, c, sin] for i in range(steps_out)])
+    return np.array(y_baseline)
+
+def baseline_loss(X_test, y_test, steps_out, speed_only):
+    y_baseline = get_baseline_y_test(X_test, steps_out, speed_only)
+    print(y_test.shape)
+    print(y_baseline.shape)
+
+    if speed_only:
+        print("Baseline MSE speed: ", mean_squared_error(y_test.reshape(y_test.shape[0]*steps_out), y_baseline.reshape(y_test.shape[0]*steps_out)))
+
+    else:
+        print("Baseline MSE speed: ", mean_squared_error(y_test[:,:,0].reshape(y_test.shape[0]*steps_out), y_baseline[:,:,0].reshape(y_test.shape[0]*steps_out)))
+        print("Baseline MSE cos: ", mean_squared_error(y_test[:,:,1].reshape(y_test.shape[0]*steps_out), y_baseline[:,:,1].reshape(y_test.shape[0]*steps_out)))
+        print("Baseline MSE sin: ", mean_squared_error(y_test[:,:,2].reshape(y_test.shape[0]*steps_out), y_baseline[:,:,2].reshape(y_test.shape[0]*steps_out)))
+
+
+
+
+
+
+
+
+
