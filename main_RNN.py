@@ -24,7 +24,7 @@ parser.add_argument("--lr", type=float, default=0.001,
 parser.add_argument("--drop-out", type=float, default=0.5,
                             help="drop out")
 
-parser.add_argument("--cell1size", type=int, default=64,
+parser.add_argument("--cell1size", type=int, default=32,
                             help="cell size for lstm")
 
 parser.add_argument("--epochs", type=int, default=20,
@@ -33,7 +33,7 @@ parser.add_argument("--epochs", type=int, default=20,
 parser.add_argument("--batch_size", type=int, default=64,
                             help="batch_size")
 
-parser.add_argument("--test-size", type=float, default=0.15,
+parser.add_argument("--test-size", type=float, default=0.1,
                             help="test_size")
 
 parser.add_argument("--speed-only", action="store_true",
