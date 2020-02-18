@@ -30,7 +30,7 @@ parser.add_argument("--cell1size", type=int, default=32,
 parser.add_argument("--epochs", type=int, default=20,
                             help="epochs")
 
-parser.add_argument("--batch_size", type=int, default=64,
+parser.add_argument("--batch-size", type=int, default=64,
                             help="batch_size")
 
 parser.add_argument("--test-size", type=float, default=0.1,
