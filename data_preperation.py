@@ -177,44 +177,48 @@ def prepare_data(one_hot=False):
 
 #STEP 2: Merging with Forecast Data
 #get forecast data
-def get_forecast_data():
-    f00 = pd.read_csv("Data/forecast_00.csv")
-    f12 = pd.read_csv("Data/forecast_12.csv")
-    f24 = pd.read_csv("Data/forecast_24.csv")
-    f36 = pd.read_csv("Data/forecast_36.csv")
-    f48 = pd.read_csv("Data/forecast_48.csv")
-    return f00, f12, f24, f36, f48
+def get_forecast():
+    df= pd.read_csv('weather_forecast_data_for_cynthia.csv', sep = ";")
+    print('reading forecast data')
+    return df
 
-#Functions to process forecast data
 #convert to datetime index
 def convert_datetime(df):
-    df['datetime'] = pd.to_datetime(df['date'], format='%m/%d/%y %H:%M')
+    df['f_date'] = pd.to_datetime(df['date'], format='%d/%m/%Y %H:%M') #future_date
+    df['cycle']=df['cycle'].str.replace('h', ':00', regex=True)
+    df['p_date'] = pd.to_datetime(df['cycle'], format='%d/%m/%Y %H:%M') #present_date
     df.drop(['date', 'cycle'], axis=1, inplace=True)
-    df.set_index('datetime', inplace=True)
+    return df
+
+def keep_last_forecast (df0):
+    df= df0.copy()
+    df.sort_values(by=['f_date', 'p_date'], inplace=True)
+    df.drop_duplicates(subset = "f_date", keep = 'last', inplace=True)
+    print('keep last forecast, duplicates dropped = ', (df0.shape[0] - df.shape[0]))
     return df
 
 #rename columns
 def rename_cols(df):
-    df_out = df.rename(columns={"direction (ｰ)": "wind_dir", "vitesse (m/s)": "speed"}) # additional features"temperature (ｰC)": "temp", "rayonnement (W/m2)": "radiation","precip (mm/h)":"precip"
+    df = df.rename(columns={"Wind direction": "wind_dir", "Wind speed (m/s)": "speed"}) # additional features"temperature (ｰC)": "temp", "rayonnement (W/m2)": "radiation","precip (mm/h)":"precip"
     #keep just wind_dir and speed features
-    df_out = df_out[['wind_dir','speed']]
-    return df_out
+    df = df[['wind_dir','speed','f_date']]
+    #index with future date
+    df.set_index('f_date', inplace=True)
+    return df
 
-#Function to merge data with forecast data
+
+#merge data with forecast data
 def prepare_data_with_forecast(data):
     #get prepared measurement data
-    data_merge=data.copy()
-    #get forecast data
-    f00, f12, f24, f36, f48 = get_forecast_data()
-    name_str = ['f00', 'f12', 'f24', 'f36', 'f48']
-    i = 0
-    for df in [f00, f12, f24, f36, f48]:
-        df_temp = convert_datetime(df)
-        df_temp = rename_cols(df_temp)
-        df_temp = smooth_wind_dir(df_temp)
-        data_merge = data_merge.join(df_temp, how='left', rsuffix='_'+name_str[i])
-        i+=1
-    print('merged with forecast data '+ str(name_str))
-    return data_merge
-#data=prepare_data(one_hot=False)
-#data_merge = prepare_data_with_forecast(data)
+    data_merge = data.copy()
+    forecast = get_forecast()
+    df= convert_datetime(forecast)
+    df= rename_cols(df)
+    df = smooth_wind_dir(df)
+    data_merge = data_merge.join(df, how='left', rsuffix='_forecast')
+    print('merge with forecast data')
+    return data_merge, data, forecast
+
+
+# data=prepare_data(one_hot=False)
+# data_merge, data, forecast  = prepare_data_with_forecast(data)
