@@ -213,6 +213,7 @@ def prepare_data_with_forecast(data):
     data_merge = data.copy()
     forecast = get_forecast()
     df= convert_datetime(forecast)
+    df = keep_last_forecast (df)
     df= rename_cols(df)
     df = smooth_wind_dir(df)
     data_merge = data_merge.join(df, how='left', rsuffix='_forecast')
