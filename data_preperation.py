@@ -190,12 +190,20 @@ def convert_datetime(df):
     df.drop(['date', 'cycle'], axis=1, inplace=True)
     return df
 
+#calculate forecast period in hours
+def forecast_period(df):
+    df['f_period'] =df['f_date'] - df['p_date']
+    df['f_period'] = df['f_period'].dt.components['hours']+forecast['f_period'].dt.components['days']*24
+    return df
+
+
 def keep_last_forecast (df0):
     df= df0.copy()
     df.sort_values(by=['f_date', 'p_date'], inplace=True)
     df.drop_duplicates(subset = "f_date", keep = 'last', inplace=True)
     print('keep last forecast, duplicates dropped = ', (df0.shape[0] - df.shape[0]))
     return df
+
 
 #rename columns
 def rename_cols(df):
@@ -208,15 +216,18 @@ def rename_cols(df):
 
 
 #merge data with forecast data
-def prepare_data_with_forecast(data):
+def prepare_data_with_forecast(data, keep_only_last = True):
     #get prepared measurement data
     data_merge = data.copy()
     forecast = get_forecast()
     df= convert_datetime(forecast)
-    df = keep_last_forecast (df)
+    df = forecast_period(df)
+    if keep_only_last:
+        df = keep_last_forecast (df)
     df= rename_cols(df)
     df = smooth_wind_dir(df)
     data_merge = data_merge.join(df, how='left', rsuffix='_forecast')
+    forecast = df.copy()
     print('merge with forecast data')
     return data_merge, data, forecast
 
