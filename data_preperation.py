@@ -193,7 +193,7 @@ def convert_datetime(df):
 #calculate forecast period in hours
 def forecast_period(df):
     df['f_period'] =df['f_date'] - df['p_date']
-    df['f_period'] = df['f_period'].dt.components['hours']+forecast['f_period'].dt.components['days']*24
+    df['f_period'] = df['f_period'].dt.components['hours']+df['f_period'].dt.components['days']*24
     return df
 
 
@@ -209,7 +209,7 @@ def keep_last_forecast (df0):
 def rename_cols(df):
     df = df.rename(columns={"Wind direction": "wind_dir", "Wind speed (m/s)": "speed"}) # additional features"temperature (ｰC)": "temp", "rayonnement (W/m2)": "radiation","precip (mm/h)":"precip"
     #keep just wind_dir and speed features
-    df = df[['wind_dir','speed','f_date']]
+    df = df[['wind_dir','speed','f_date','p_date','f_period']]
     #index with future date
     df.set_index('f_date', inplace=True)
     return df
