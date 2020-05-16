@@ -157,7 +157,10 @@ def prepare_data(one_hot=False):
     data = smooth_wind_dir(data)
     data = smooth_hour(data)
     data = smooth_day(data)
-    data.drop(['details'], axis=1, inplace=True)
+    try:
+        data.drop(['details'], axis=1, inplace=True)
+    except:
+        print("No details column")
     data.index = data['datetime']
     data = data.interpolate()
 
