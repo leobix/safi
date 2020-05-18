@@ -1,18 +1,11 @@
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
 from datetime import date, datetime, timedelta
 import data_preperation as prep
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import MinMaxScaler
 
 import warnings
 warnings.filterwarnings('ignore')
 
-
-from sklearn.metrics import mean_squared_error
-from sklearn.metrics import mean_absolute_error
-from xgboost import XGBRegressor
 
 """
 Function to prepare data for models:
