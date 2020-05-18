@@ -21,7 +21,7 @@ def prepare_measurement():
     df= daily_avg(df)
     df = generate_daily(df)
     df = generate_season(df)
-    df = generate_day_night(df)
+    df = generate_am_pm(df)
     return df
 
 """
@@ -137,13 +137,13 @@ def generate_season(df):
     return df
 
 
-def generate_day_night(df):
+def generate_am_pm(df):
     s1=df.index.hour
-    df['day'] = 0
-    df['night'] = 0
-    df.loc[s1.isin([8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]), 'day'] = 1
-    df.loc[s1.isin([0, 1, 2, 3, 4, 5, 6, 7, 19, 20, 21, 22, 23]), 'night'] = 1
-    print('generate day/night categorical feature')
+    df['am'] = 0
+    df['pm'] = 0
+    df.loc[s1.isin([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 ]), 'am'] = 1
+    df.loc[s1.isin([12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]), 'pm'] = 1
+    print('generate am/pm categorical feature')
     return df
 
 
