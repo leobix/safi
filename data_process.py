@@ -47,6 +47,9 @@ def prepare_x_y(measurement, forecast, past_n_steps, pred_period, param='speed')
     index2= y_df['forecast_time']
     x_df = pd.merge(x_df, index2, left_on = 'forecast_time', right_on='forecast_time')
 
+    #set index:
+    x_df.reset_index()
+
     #change df to array, drop datetime columns
     x, y = df_to_array(x_df, y_df)
     return x_df, y_df, x, y
@@ -70,15 +73,18 @@ def get_past_n_steps(df, steps_in):
     return df_out
 
 def join_forecast(df, forecast, predict):
-
+    #crop out under 6 hour forecasts due to lag
+    forecast = forecast.loc[forecast['f_period']>=6]
     #crop out forecast if forecast period is less than prediction period
-    forecast = forecast.loc[forecast['f_period']>= predict]
+    forecast = forecast.loc[forecast['f_period']>=predict]
     forecast = prep.keep_last_forecast(forecast)
     forecast = forecast.add_suffix('_forecast')
+
     #calculate forecast_time
     df['forecast_time'] = df['present_time']+ timedelta(hours=predict)
 
-    df_out = pd.merge(df, forecast, left_on = 'forecast_time', right_on ='f_date')
+    df_out = pd.merge(df, forecast, how = 'left', left_on = 'forecast_time', right_on ='f_date')
+    df_out.fillna(value=0, inplace=True) #fill missing forecasts as 0
     return df_out
 
 def smooth_day_hour(df):
@@ -89,9 +95,9 @@ def smooth_day_hour(df):
 #change x,y to array like
 def df_to_array(x_df, y_df):
     #drop timestamp columns
-    x_df.drop(['present_time','forecast_time'], axis=1, inplace=True)
-    y_df.drop(['forecast_time'], axis=1, inplace=True)
+    x= x_df.drop(['present_time','forecast_time'], axis=1)
+    y= y_df.drop(['forecast_time'], axis=1)
 
-    x = x_df.values
-    y = y_df.values
+    x = x.values
+    y = y.values
     return x, y
