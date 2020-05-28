@@ -1,17 +1,9 @@
 import pandas as pd
 import numpy as np
-from pandas import read_csv
-from pandas import read_csv
-
-from pandas import read_csv
-from pandas import DataFrame
-from pandas import concat
-from sklearn.metrics import mean_squared_error
 
 #Time
 from datetime import date, datetime, timedelta
 from sklearn.preprocessing import MinMaxScaler
-from sklearn.model_selection import train_test_split
 
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import LSTM
@@ -20,12 +12,24 @@ from tensorflow.keras.layers import RepeatVector
 from tensorflow.keras.layers import TimeDistributed
 from tensorflow.keras.layers import Dropout
 
-from sklearn.model_selection import train_test_split
 from tensorflow.keras.optimizers import Adam
 from numpy.random import seed
 
-#from data_preperation import * 
 import tensorflow as tf
+
+import data_process as proc
+from utils_scenario import *
+
+from datetime import date, datetime, timedelta
+import data_preperation as prep
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import MinMaxScaler
+import warnings
+warnings.filterwarnings('ignore')
+from sklearn.metrics import mean_squared_error
+from sklearn.metrics import mean_absolute_error
+from xgboost import XGBRegressor
+
 
 seed(6)
 tf.random.set_seed(6)
@@ -142,8 +146,28 @@ def baseline_loss(X_test, y_test, steps_out, speed_only):
         print("Baseline MSE sin: ", mean_squared_error(y_test[:,:,2].reshape(y_test.shape[0]*steps_out), y_baseline[:,:,2].reshape(y_test.shape[0]*steps_out)))
 
 
+def run_regression(steps_in, steps_out):
+    # Parameter list:
+    param_list = ['speed', 'cos_wind_dir', 'sin_wind_dir']
 
+    predict = pd.DataFrame(columns={'speed', 'cos_wind_dir', 'sin_wind_dir'})
+    true = pd.DataFrame(columns={'speed', 'cos_wind_dir', 'sin_wind_dir'})
+    baseline = pd.DataFrame(columns={'speed', 'cos_wind_dir', 'sin_wind_dir'})
 
+    for param in param_list:
+        x_df, y_df, x, y = proc.prepare_x_y(measurement, forecast, steps_in, steps_out, param)
+        X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=0.2, shuffle=False)
+        xg = XGBRegressor(max_depth=5)
+        xg.fit(X_train, y_train)
+        y_hat = xg.predict(X_test)
+
+        predict[param] = pd.Series(y_hat)
+        true[param] = pd.Series(y_test.flatten())
+        baseline[param] = x_df[param + '_forecast'][-len(y_hat):]
+
+    # reset index
+    baseline.reset_index(inplace=True)
+    return predict, true, baseline
 
 
 
