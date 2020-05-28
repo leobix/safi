@@ -86,7 +86,7 @@ if __name__ == "__main__":
     t_list=[1,3,6,9,12,15,18,24,30,36,42,48]
 
     for t in t_list:
-        # print(t)
+        print(t)
         #run model
         predict, true, base = run_regression(steps_in=48, steps_out=t)
 
