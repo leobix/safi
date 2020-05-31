@@ -120,3 +120,25 @@ def get_all_dangerous_scenarios(y_speed, y_cos, y_sin):
     for i in range(len(y_speed)):
         y.append(get_dangerous_scenario(y_speed[i], y_cos[i], y_sin[i]))
     return np.array(y)
+
+
+def scenario_accuracy(predict, true, baseline):
+    pred = get_all_scenarios(predict['speed'], predict['cos_wind_dir'],predict['sin_wind_dir'], b_scenarios=True)
+    true = get_all_scenarios(true['speed'], true['cos_wind_dir'],true['sin_wind_dir'], b_scenarios=True)
+    base = get_all_scenarios(baseline['speed'], baseline['cos_wind_dir'],baseline['sin_wind_dir'], b_scenarios=True)
+
+    #calculate prediction accuracies
+    pred_score = accuracy_score(pred, true).round(3)
+    base_score = accuracy_score(base, true).round(3)
+
+    return  pred_score, base_score
+
+def binary_accuracy(predict, true, baseline):
+    pred = get_all_dangerous_scenarios(predict['speed'], predict['cos_wind_dir'],predict['sin_wind_dir'])
+    true = get_all_dangerous_scenarios(true['speed'], true['cos_wind_dir'],true['sin_wind_dir'])
+    base = get_all_dangerous_scenarios(baseline['speed'], baseline['cos_wind_dir'],baseline['sin_wind_dir'])
+
+    #calculate prediction accuracies
+    pred_score = accuracy_score(pred, true).round(3)
+    base_score = accuracy_score(base, true).round(3)
+    return  pred_score, base_score
