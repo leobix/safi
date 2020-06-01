@@ -78,7 +78,7 @@ def main(args):
     ###BASELINES
     y_test_baseline_speed, y_test_baseline_cos_wind, y_test_baseline_sin_wind, y_baseline_dangerous_scenarios, y_baseline_scenarios = get_baselines(
         x_df, x)
-
+    print(plt.hist(y_test_scenarios))
     ###Regression
     #Grids
     grid_speed = iai.GridSearch(
@@ -158,11 +158,6 @@ def main(args):
 
     print("Regression based scenarios, Accuracy:",
           accuracy_score(y_test_scenarios, y_hat_scenario_from_regression))
-    print("Regression based ROC_AUC: ovo", roc_auc_score(y_test_scenarios, y_hat_scenario_from_regression, multi_class='ovo'))
-    print("Regression based ROC_AUC: ovo + macro", roc_auc_score(y_test_scenarios, y_hat_scenario_from_regression, average = 'macro', multi_class='ovo'))
-
-    print("Regression based ROC_AUC: ovr", roc_auc_score(y_test_scenarios, y_hat_scenario_from_regression, multi_class='ovr'))
-
 
     print("Classification based scenarios, Accuracy: ", lnr_scenarios.score(X_test, y_test_scenarios, criterion='misclassification'))
     print("Classification based dangerous: Accuracy: ", lnr_dangerous.score(X_test, y_test_dangerous, criterion='misclassification'))
