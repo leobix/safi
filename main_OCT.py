@@ -37,14 +37,14 @@ parser.add_argument("--steps-in", type=int, default=48,
 parser.add_argument("--steps-out", type=int, default=24,
                             help="number of out time steps")
 
-parser.add_argument("--min-depth", type=int, default=4,
+parser.add_argument("--min-depth", type=int, default=6,
                             help="min depth")
 
 parser.add_argument("--max-depth", type=int, default=7,
                             help="max depth (not included)")
 
 parser.add_argument("--local", action='store_true',
-                            help="max depth (not included)")
+                            help="if used on local computer because of iai compatibility")
 
 
 
@@ -109,15 +109,16 @@ def main(args):
     )
     #Fit
     grid_speed.fit(X_train_reg, y_train_speed_reg)
-    grid_cos.fit(X_train_reg, y_train_cos_reg)
-    grid_sin.fit(X_train_reg, y_train_sin_reg)
-
     lnr_speed = grid_speed.get_learner()
-    lnr_cos = grid_cos.get_learner()
-    lnr_sin = grid_sin.get_learner()
+    lnr_speed.write_html("Trees/Regression_tree_speed_in" + str(args.steps_in) + "_out" + str(args.steps_out) + ".html")
 
-    lnr_speed.write_html("Trees/Regression_tree_speed_in" + str(args.steps_in) + "_out" + str(args.steps_out) +".html")
+
+    grid_cos.fit(X_train_reg, y_train_cos_reg)
+    lnr_cos = grid_cos.get_learner()
     lnr_cos.write_html("Trees/Regression_tree_cos_in" + str(args.steps_in) + "_out" + str(args.steps_out) +".html")
+
+    grid_sin.fit(X_train_reg, y_train_sin_reg)
+    lnr_sin = grid_sin.get_learner()
     lnr_sin.write_html("Trees/Regression_tree_sin_in" + str(args.steps_in) + "_out" + str(args.steps_out) +".html")
 
     #Predict
@@ -154,12 +155,12 @@ def main(args):
     )
 
     grid_scenarios.fit(X_train2, y_train_scenarios)
-    grid_dangerous.fit(X_train2, y_train_dangerous)
-
     lnr_scenarios = grid_scenarios.get_learner()
-    lnr_dangerous = grid_dangerous.get_learner()
-
     lnr_scenarios.write_html("Trees/Classification_tree_scenarios_in" + str(args.steps_in) + "_out" + str(args.steps_out) +".html")
+
+
+    grid_dangerous.fit(X_train2, y_train_dangerous)
+    lnr_dangerous = grid_dangerous.get_learner()
     lnr_dangerous.write_html("Trees/Classification_tree_dangerous_in" + str(args.steps_in) + "_out" + str(args.steps_out) +".html")
 
     print("Regression based scenarios, Accuracy:",
