@@ -27,9 +27,6 @@ from sklearn.metrics import classification_report
 
 ##IAI
 from julia import Julia
-#Julia(sysimage='../sys.so')
-Julia(compiled_modules = False)
-from interpretableai import iai
 
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -39,6 +36,15 @@ parser.add_argument("--steps-in", type=int, default=48,
 
 parser.add_argument("--steps-out", type=int, default=24,
                             help="number of out time steps")
+
+parser.add_argument("--min-depth", type=int, default=4,
+                            help="min depth")
+
+parser.add_argument("--max-depth", type=int, default=7,
+                            help="max depth (not included)")
+
+parser.add_argument("--local", action='store_true',
+                            help="max depth (not included)")
 
 
 
@@ -78,28 +84,28 @@ def main(args):
     ###BASELINES
     y_test_baseline_speed, y_test_baseline_cos_wind, y_test_baseline_sin_wind, y_baseline_dangerous_scenarios, y_baseline_scenarios = get_baselines(
         x_df, x)
-    print(plt.hist(y_test_scenarios))
+
     ###Regression
     #Grids
     grid_speed = iai.GridSearch(
         iai.OptimalTreeRegressor(
             random_seed=1,
         ),
-        max_depth=range(0, 1),
+        max_depth=range(args.min_depth, args.max_depth),
     )
 
     grid_cos = iai.GridSearch(
         iai.OptimalTreeRegressor(
             random_seed=1,
         ),
-        max_depth=range(0, 1),
+        max_depth=range(args.min_depth, args.max_depth),
     )
 
     grid_sin = iai.GridSearch(
         iai.OptimalTreeRegressor(
             random_seed=1,
         ),
-        max_depth=range(0, 1),
+        max_depth=range(args.min_depth, args.max_depth),
     )
     #Fit
     grid_speed.fit(X_train_reg, y_train_speed_reg)
@@ -137,14 +143,14 @@ def main(args):
         iai.OptimalTreeClassifier(
             random_seed=1,
         ),
-        max_depth=range(0, 1),
+        max_depth=range(args.min_depth, args.max_depth),
     )
 
     grid_dangerous = iai.GridSearch(
         iai.OptimalTreeClassifier(
             random_seed=1,
         ),
-        max_depth=range(0, 1),
+        max_depth=range(args.min_depth, args.max_depth),
     )
 
     grid_scenarios.fit(X_train2, y_train_scenarios)
@@ -174,6 +180,11 @@ def main(args):
 if __name__ == "__main__":
    args = parser.parse_args()
    print(args)
+   if args.local:
+        Julia(compiled_modules=False)
+   else:
+        Julia(sysimage='../sys.so')
+   from interpretableai import iai
    main(args)
 
 
