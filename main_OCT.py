@@ -116,9 +116,9 @@ def main(args):
     lnr_cos = grid_cos.get_learner()
     lnr_sin = grid_sin.get_learner()
 
-    lnr_speed.write_html("Trees/Regression_tree_speed.html")
-    lnr_cos.write_html("Trees/Regression_tree_cos.html")
-    lnr_sin.write_html("Trees/Regression_tree_sin.html")
+    lnr_speed.write_html("Trees/Regression_tree_speed_in" + str(args.steps_in) + "_out" + str(args.steps_out) +".html")
+    lnr_cos.write_html("Trees/Regression_tree_cos_in" + str(args.steps_in) + "_out" + str(args.steps_out) +".html")
+    lnr_sin.write_html("Trees/Regression_tree_sin_in" + str(args.steps_in) + "_out" + str(args.steps_out) +".html")
 
     #Predict
     y_hat_speed = grid_speed.predict(X_test)
@@ -159,8 +159,8 @@ def main(args):
     lnr_scenarios = grid_scenarios.get_learner()
     lnr_dangerous = grid_dangerous.get_learner()
 
-    lnr_scenarios.write_html("Trees/Classification_tree_scenarios.html")
-    lnr_dangerous.write_html("Trees/Classification_tree_dangerous.html")
+    lnr_scenarios.write_html("Trees/Classification_tree_scenarios_in" + str(args.steps_in) + "_out" + str(args.steps_out) +".html")
+    lnr_dangerous.write_html("Trees/Classification_tree_dangerous_in" + str(args.steps_in) + "_out" + str(args.steps_out) +".html")
 
     print("Regression based scenarios, Accuracy:",
           accuracy_score(y_test_scenarios, y_hat_scenario_from_regression))
