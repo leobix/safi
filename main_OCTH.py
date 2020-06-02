@@ -113,16 +113,16 @@ def main(args):
     #Fit
     grid_speed.fit(X_train_reg, y_train_speed_reg)
     lnr_speed = grid_speed.get_learner()
-    lnr_speed.write_html("Trees/Regression_tree_speed_in" + str(args.steps_in) + "_out" + str(args.steps_out) + ".html")
+    lnr_speed.write_html("Trees/OCTH_Regression_tree_speed_in" + str(args.steps_in) + "_out" + str(args.steps_out) + ".html")
 
 
     grid_cos.fit(X_train_reg, y_train_cos_reg)
     lnr_cos = grid_cos.get_learner()
-    lnr_cos.write_html("Trees/Regression_tree_cos_in" + str(args.steps_in) + "_out" + str(args.steps_out) +".html")
+    lnr_cos.write_html("Trees/OCTH_Regression_tree_cos_in" + str(args.steps_in) + "_out" + str(args.steps_out) +".html")
 
     grid_sin.fit(X_train_reg, y_train_sin_reg)
     lnr_sin = grid_sin.get_learner()
-    lnr_sin.write_html("Trees/Regression_tree_sin_in" + str(args.steps_in) + "_out" + str(args.steps_out) +".html")
+    lnr_sin.write_html("Trees/OCTH_Regression_tree_sin_in" + str(args.steps_in) + "_out" + str(args.steps_out) +".html")
 
     #Predict
     y_hat_speed = grid_speed.predict(X_test)
@@ -161,12 +161,12 @@ def main(args):
 
     grid_scenarios.fit(X_train2, y_train_scenarios)
     lnr_scenarios = grid_scenarios.get_learner()
-    lnr_scenarios.write_html("Trees/Classification_tree_scenarios_in" + str(args.steps_in) + "_out" + str(args.steps_out) +".html")
+    lnr_scenarios.write_html("Trees/OCTH_Classification_tree_scenarios_in" + str(args.steps_in) + "_out" + str(args.steps_out) +".html")
 
 
     grid_dangerous.fit(X_train2, y_train_dangerous)
     lnr_dangerous = grid_dangerous.get_learner()
-    lnr_dangerous.write_html("Trees/Classification_tree_dangerous_in" + str(args.steps_in) + "_out" + str(args.steps_out) +".html")
+    lnr_dangerous.write_html("Trees/OCTH_Classification_tree_dangerous_in" + str(args.steps_in) + "_out" + str(args.steps_out) +".html")
 
     print("Regression based scenarios, Accuracy:",
           accuracy_score(y_test_scenarios, y_hat_scenario_from_regression))
