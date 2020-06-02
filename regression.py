@@ -74,7 +74,7 @@ if __name__ == "__main__":
     measurement=prep.prepare_measurement()
     forecast = prep.prepare_forecast()
     #keep useful columns
-    measurement= measurement[['speed', 'cos_wind_dir', 'sin_wind_dir', 'temp', 'radiation', 'precip','d_speed_max','d_temp_max', 'season', 'am']]
+    measurement= measurement[['speed', 'cos_wind_dir', 'sin_wind_dir', 'temp', 'radiation', 'precip','season', 'am']]
 
     #set up empty dataframes
     accuracy = pd.DataFrame(columns={})
