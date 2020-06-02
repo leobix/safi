@@ -1,9 +1,5 @@
 import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-from datetime import date, datetime, timedelta
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import MinMaxScaler
 from sklearn import metrics
 from xgboost import XGBRegressor, XGBClassifier
 import warnings

@@ -5,8 +5,6 @@ import argparse
 
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
-from datetime import date, datetime, timedelta
 
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import roc_auc_score
@@ -21,9 +19,7 @@ from utils_baselines import *
 
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics import mean_absolute_error
-from sklearn.metrics import confusion_matrix
 from sklearn.metrics import accuracy_score
-from sklearn.metrics import classification_report
 
 ##IAI
 from julia import Julia
