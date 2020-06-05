@@ -34,38 +34,46 @@ def is_South(cos, sin):
     return False
 
 
-def is_S1(speed, cos, sin):
-    if speed >= 4:
+def is_SouthEastSouthWest(cos, sin):
+    angle = get_angle_in_degree(cos, sin)
+    # Direction S, SSO, SSE
+    if 101.25 <= angle <= 146.25:
         return True
-    elif speed > 1 and is_favorable(cos, sin):
+    elif 213.75 <= angle <= 258.75:
+        return True
+    return False
+
+def is_S1(speed, cos, sin):
+    if speed > 4:
+        return True
+    elif speed >= 1 and is_favorable(cos, sin):
         return True
     return False
 
 
 def is_S2(speed, cos, sin):
-    if 2 <= speed < 4 and not is_favorable(cos, sin):
+    if 2 < speed <= 4 and not is_favorable(cos, sin) and not is_South(cos, sin):
         return True
-    elif 0.5 <= speed <= 1 and is_favorable(cos, sin):
+    elif 0.5 <= speed < 1 and is_favorable(cos, sin):
         return True
     return False
 
 
 def is_S2b(speed, cos, sin):
-    if 1 <= speed <= 2 and not is_favorable(cos, sin) and not is_South(cos, sin):
+    #Direction is ESE-SE, SO,OSO,O,ONO
+    if 0.5 <= speed <= 2 and not is_favorable(cos, sin) and not is_South(cos, sin):
         return True
     return False
 
 
 def is_S3(speed, cos, sin):
-    if 0.5 <= speed < 1 and not is_favorable(cos, sin) and not is_South(cos, sin):
-        return True
-    elif speed < 0.5 and is_favorable(cos, sin):
+    if speed < 0.5 and is_favorable(cos, sin):
         return True
     return False
 
 
 def is_S3b(speed, cos, sin):
-    if speed < 2 and is_South(cos, sin):
+    if 0.5 <= speed <= 4 and is_South(cos, sin):
         return True
     return False
 
@@ -93,20 +101,13 @@ def get_scenario(speed, cos, sin, b_scenarios):
     print("speed: ", speed, " cos: ", cos, " sin: ", sin)
 
 def get_dangerous_scenario(speed, cos, sin):
-    if is_S1(speed, cos, sin):
-        return 0
-    elif is_S2(speed, cos, sin):
-        return 0
-    elif is_S2b(speed, cos, sin):
-        return 0
-    elif is_S3(speed, cos, sin):
+    if speed < 0.5:
         return 1
-    elif is_S3b(speed, cos, sin):
+    if is_South(cos, sin):
         return 1
-    elif is_S4(speed, cos, sin):
+    if 0.5 <= speed <= 2 and is_SouthEastSouthWest(cos, sin):
         return 1
-    print("There is a problem.")
-    print("speed: ", speed, " cos: ", cos, " sin: ", sin)
+    return 0
 
 
 def get_all_scenarios(y_speed, y_cos, y_sin, b_scenarios = False):
