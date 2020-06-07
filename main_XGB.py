@@ -1,5 +1,9 @@
 import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from datetime import date, datetime, timedelta
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import MinMaxScaler
 from sklearn import metrics
 from xgboost import XGBRegressor, XGBClassifier
 import warnings
@@ -58,8 +62,13 @@ def binary_accuracy(predict, true, baseline):
     base_auc = metrics.roc_auc_score(base, true).round(3)
     return  pred_score, base_score, pred_auc, base_auc
 
-
-
+def get_mae(predict, true, baseline):
+    speed = metrics.mean_absolute_error(predict['speed'], true['speed'])
+    speed_base=metrics.mean_absolute_error(baseline['speed'], true['speed'])
+    angle = metrics.mean_absolute_error(predict['angle'], true['angle'])
+    angle_base=metrics.mean_absolute_error(baseline['angle'], true['angle'])
+    return speed, speed_base, angle, angle_base 
+    
 
 
 if __name__ == "__main__":
@@ -81,14 +90,21 @@ if __name__ == "__main__":
     t_list=[1,3,6,9,12,15,18,21,24,27,30,33,36,39,42,45,48]
     steps_in=48
 
-
     for t in t_list:
         #run model
         predict, true, base = run_xgb(steps_in, steps_out=t)
 
-        #calculate accuracy & auc
+        #calculate angles from sin and cosine  
+        predict['angle'] = predict.apply(lambda row: utils.get_angle_in_degree(row['cos_wind_dir'],row['sin_wind_dir']),axis = 1)
+        true['angle'] = true.apply(lambda row: utils.get_angle_in_degree(row['cos_wind_dir'],row['sin_wind_dir']), axis = 1)
+        base['angle'] = base.apply(lambda row: utils.get_angle_in_degree(row['cos_wind_dir'],row['sin_wind_dir']), axis = 1)
+
+        #calculate mae for regression 
+        mae_speed, mae_speed_base, mae_angle, mae_angle_base = get_mae(predict, true, base) 
+        #calculate accuracy & auc for scenario prediction 
         pred_scenario, base_scenario  = scenario_accuracy(predict, true, base)
         pred_bin_accu, base_bin_accu, pred_bin_auc, base_bin_auc= binary_accuracy(predict, true, base)
+
 
         #record accuracy
         accuracy = accuracy.append({'past_n_steps': str(steps_in),
@@ -98,15 +114,15 @@ if __name__ == "__main__":
                                           'xbg_binary_accu':pred_bin_accu,
                                           'base_binary_accu':base_bin_accu,
                                             'xbg_binary_auc':pred_bin_auc,
-                                          'base_binary_auc':base_bin_auc}, ignore_index=True)
+                                          'base_binary_auc':base_bin_auc,
+                                            'xbg_speed_mae': mae_speed,
+                                            'base_speed_mae': mae_speed_base,
+                                            'xgb_angle_mae': mae_angle,
+                                            'base_angle_mae': mae_angle_base}, ignore_index=True)
         #record predicted speed
         pred_speed = pd.concat([pred_speed, predict['speed'].rename('speed_t+'+str(t))], axis=1)
         #record predicted angle
-        temp = pd.concat([predict['cos_wind_dir'], predict['sin_wind_dir']], axis=1)
-        temp['angle'] = temp.apply(lambda row : utils.get_angle_in_degree(row['cos_wind_dir'],row['sin_wind_dir']), axis = 1)
-        pred_angle = pd.concat([pred_angle, temp['angle'].rename('angle_t+'+str(t))], axis=1)
-
-
+        pred_angle = pd.concat([pred_angle, predict['angle'].rename('angle_t+'+str(t))], axis=1)
 
     #output results df
     accuracy.to_csv('results/xgboost_accuracy.csv', index=False)
