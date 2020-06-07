@@ -42,6 +42,12 @@ parser.add_argument("--max-depth", type=int, default=7,
 parser.add_argument("--local", action='store_true',
                             help="if used on local computer because of iai compatibility")
 
+parser.add_argument("--autobalance", action='store_true',
+                            help="for data unbalance")
+
+parser.add_argument("--filename", type=str, default='v1',
+                            help="filename for Trees")
+
 
 
 def main(args):
@@ -106,16 +112,18 @@ def main(args):
     #Fit
     grid_speed.fit(X_train_reg, y_train_speed_reg)
     lnr_speed = grid_speed.get_learner()
-    lnr_speed.write_html("Trees/Regression_tree_speed_in" + str(args.steps_in) + "_out" + str(args.steps_out) + ".html")
-
+    lnr_speed.write_html("Trees/" + args.filename + "_Regression_tree_speed_in" + str(args.steps_in) + "_out" + str(args.steps_out) + ".html")
+    print(grid_speed.get_grid_results())
 
     grid_cos.fit(X_train_reg, y_train_cos_reg)
     lnr_cos = grid_cos.get_learner()
-    lnr_cos.write_html("Trees/Regression_tree_cos_in" + str(args.steps_in) + "_out" + str(args.steps_out) +".html")
+    lnr_cos.write_html("Trees/" + args.filename + "_Regression_tree_cos_in" + str(args.steps_in) + "_out" + str(args.steps_out) +".html")
+    print(grid_cos.get_grid_results())
 
     grid_sin.fit(X_train_reg, y_train_sin_reg)
     lnr_sin = grid_sin.get_learner()
-    lnr_sin.write_html("Trees/Regression_tree_sin_in" + str(args.steps_in) + "_out" + str(args.steps_out) +".html")
+    lnr_sin.write_html("Trees/" + args.filename + "_Regression_tree_sin_in" + str(args.steps_in) + "_out" + str(args.steps_out) +".html")
+    print(grid_sin.get_grid_results())
 
     #Predict
     y_hat_speed = grid_speed.predict(X_test)
@@ -139,6 +147,7 @@ def main(args):
     grid_scenarios = iai.GridSearch(
         iai.OptimalTreeClassifier(
             random_seed=1,
+            criterion='gini',
         ),
         max_depth=range(args.min_depth, args.max_depth),
     )
@@ -146,18 +155,58 @@ def main(args):
     grid_dangerous = iai.GridSearch(
         iai.OptimalTreeClassifier(
             random_seed=1,
+            criterion='gini',
         ),
         max_depth=range(args.min_depth, args.max_depth),
     )
 
     grid_scenarios.fit(X_train2, y_train_scenarios)
     lnr_scenarios = grid_scenarios.get_learner()
-    lnr_scenarios.write_html("Trees/Classification_tree_scenarios_in" + str(args.steps_in) + "_out" + str(args.steps_out) +".html")
-
+    lnr_scenarios.write_html("Trees/" + args.filename + "_Classification_tree_scenarios_in" + str(args.steps_in) + "_out" + str(args.steps_out) +".html")
+    print(grid_scenarios.get_grid_results())
 
     grid_dangerous.fit(X_train2, y_train_dangerous)
     lnr_dangerous = grid_dangerous.get_learner()
-    lnr_dangerous.write_html("Trees/Classification_tree_dangerous_in" + str(args.steps_in) + "_out" + str(args.steps_out) +".html")
+    lnr_dangerous.write_html("Trees/" + args.filename + "_Classification_tree_dangerous_in" + str(args.steps_in) + "_out" + str(args.steps_out) +".html")
+    print(grid_dangerous.get_grid_results())
+
+    if args.autobalance:
+        grid_scenarios_autobalance = iai.GridSearch(
+            iai.OptimalTreeClassifier(
+                random_seed=1,
+                criterion='gini',
+            ),
+            max_depth=range(args.min_depth, args.max_depth),
+        )
+
+        grid_dangerous_autobalance = iai.GridSearch(
+            iai.OptimalTreeClassifier(
+                random_seed=1,
+                criterion='gini',
+            ),
+            max_depth=range(args.min_depth, args.max_depth),
+        )
+
+        grid_scenarios_autobalance.fit(X_train2, y_train_scenarios, sample_weight='autobalance')
+        lnr_scenarios_autobalance = grid_scenarios_autobalance.get_learner()
+        lnr_scenarios_autobalance.write_html(
+            "Trees/" + args.filename + "_Classification_tree_scenarios_autobalance_in" + str(args.steps_in) + "_out" + str(args.steps_out) + ".html")
+        print(grid_scenarios_autobalance.get_grid_results())
+
+        grid_dangerous_autobalance.fit(X_train2, y_train_dangerous, sample_weight='autobalance')
+        lnr_dangerous_autobalance = grid_dangerous_autobalance.get_learner()
+        lnr_dangerous_autobalance.write_html(
+            "Trees/" + args.filename + "_Classification_tree_dangerous_autobalance_in" + str(args.steps_in) + "_out" + str(args.steps_out) + ".html")
+        print(grid_dangerous_autobalance.get_grid_results())
+
+        print("Classification based scenarios autobalance, Accuracy: ",
+              lnr_scenarios_autobalance.score(X_test, y_test_scenarios, criterion='misclassification'))
+
+        print("Classification based dangerous autobalance: Accuracy: ",
+              lnr_dangerous_autobalance.score(X_test, y_test_dangerous, criterion='misclassification'))
+
+        print("Classification based dangerous autobalance: AUC: ",
+              lnr_dangerous_autobalance.score(X_test, y_test_dangerous, criterion='auc'))
 
     print("Regression based scenarios, Accuracy:",
           accuracy_score(y_test_scenarios, y_hat_scenario_from_regression))
@@ -185,3 +234,4 @@ if __name__ == "__main__":
    main(args)
 
 
+#sample_weight=:autobalance
