@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 from datetime import timedelta
-from utils import data_preperation as prep
+from utils import data_preparation as prep
 
 import warnings
 warnings.filterwarnings('ignore')
@@ -10,8 +10,8 @@ warnings.filterwarnings('ignore')
 """
 Function to prepare data for models:
 parameters:
-    measurement: measurement df (see data_preperation.py)
-    forecast: forecast df (see data_preperation.py)
+    measurement: measurement df (see data_preparation.py)
+    forecast: forecast df (see data_preparation.py)
     past_n_steps: past # of hours of data up to present day
     pred_period: prediction period # of hours
     param: prediction parameter, e.g. 'speed'

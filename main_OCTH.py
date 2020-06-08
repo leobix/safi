@@ -10,7 +10,7 @@ import warnings
 warnings.filterwarnings('ignore')
 
 #example of how to call preparation.py
-from utils import data_preperation as prep, data_process as proc
+from utils import data_preparation as prep, data_process as proc
 from utils.utils_baselines import *
 
 from sklearn.metrics import mean_absolute_error
@@ -40,7 +40,7 @@ parser.add_argument("--local", action='store_true',
 
 
 def main(args):
-    # call data_preperation.py
+    # call data_preparation.py
     measurement = prep.prepare_measurement()
     forecast = prep.prepare_forecast()
 

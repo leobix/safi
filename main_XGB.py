@@ -6,7 +6,7 @@ import warnings
 warnings.filterwarnings('ignore')
 
 #import local functions
-from utils import utils_scenario as utils, data_preperation as prep, data_process as proc
+from utils import utils_scenario as utils, data_preparation as prep, data_process as proc
 
 import argparse
 
