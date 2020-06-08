@@ -1,18 +1,19 @@
 import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-from datetime import date, datetime, timedelta
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import MinMaxScaler
 from sklearn import metrics
-from xgboost import XGBRegressor, XGBClassifier
+from xgboost import XGBRegressor
 import warnings
 warnings.filterwarnings('ignore')
 
 #import local functions
-import data_process as proc
-import data_preperation as prep
-import utils_scenario as utils
+from utils import utils_scenario as utils, data_preperation as prep, data_process as proc
+
+import argparse
+
+parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+
+parser.add_argument("--steps-in", type=int, default=48,
+                            help="number of in time steps")
 
 def run_xgb(steps_in, steps_out):
     #Parameter list:
@@ -27,7 +28,6 @@ def run_xgb(steps_in, steps_out):
         X_train, X_test, y_train, y_test= train_test_split(x, y, test_size=0.2, shuffle = False)
         xg = XGBRegressor(max_depth = 5)
         xg.fit(X_train, y_train)
-        y_baseline = x_df
         y_hat = xg.predict(X_test)
 
         predict[param] = pd.Series(y_hat)
@@ -72,8 +72,8 @@ def get_mae(predict, true, baseline):
 
 
 if __name__ == "__main__":
-    print("Executing as main program")
-    print("Value of __name__ is: ", __name__)
+    args = parser.parse_args()
+    print(args)
 
     #get data
     measurement=prep.prepare_measurement()
@@ -88,7 +88,8 @@ if __name__ == "__main__":
 
     #prediction steps
     t_list=[1,3,6,9,12,15,18,21,24,27,30,33,36,39,42,45,48]
-    steps_in=48
+
+    steps_in = args.steps_in
 
     for t in t_list:
         #run model
@@ -125,6 +126,6 @@ if __name__ == "__main__":
         pred_angle = pd.concat([pred_angle, predict['angle'].rename('angle_t+'+str(t))], axis=1)
 
     #output results df
-    accuracy.to_csv('results/xgboost_accuracy.csv', index=False)
-    pred_angle.to_csv('results/xgboost_pred_angle.csv', index=False)
-    pred_speed.to_csv('results/xgboost_pred_speed.csv', index=False)
+    accuracy.to_csv('results/xgboost_accuracy_in_' + str(args.steps_in) + '.csv', index=False)
+    pred_angle.to_csv('results/xgboost_pred_angle_in_' + str(args.steps_in) + '.csv', index=False)
+    pred_speed.to_csv('results/xgboost_pred_speed_in_' + str(args.steps_in) + '.csv', index=False)

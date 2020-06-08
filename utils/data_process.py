@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
-from datetime import date, datetime, timedelta
-import data_preperation as prep
+from datetime import timedelta
+from utils import data_preperation as prep
 
 import warnings
 warnings.filterwarnings('ignore')

@@ -3,8 +3,6 @@
 
 import argparse
 
-from utils import *
-from data_preperation import *
 from numpy.random import seed
 import tensorflow as tf
 from pandas import *

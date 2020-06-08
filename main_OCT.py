@@ -4,20 +4,15 @@
 import argparse
 
 import pandas as pd
-import numpy as np
 
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import roc_auc_score
 import warnings
 warnings.filterwarnings('ignore')
 
 #example of how to call preparation.py
-import data_process as proc
-import data_preperation as prep
-from utils_scenario import *
-from utils_baselines import *
+from utils import data_preperation as prep, data_process as proc
+from utils.utils_baselines import *
 
-from sklearn.metrics import mean_squared_error
 from sklearn.metrics import mean_absolute_error
 from sklearn.metrics import accuracy_score
 

@@ -2,7 +2,7 @@ from sklearn.model_selection import train_test_split
 import warnings
 warnings.filterwarnings('ignore')
 
-from utils_scenario import *
+from utils.utils_scenario import *
 
 
 def get_baselines(x_df, x, test_size = 0.2):
