@@ -33,7 +33,7 @@ However, you need a license to use it, so the code won't work until then.
 
 2. It is possible to retrain regularly the models and store the trained models for use. A weekly basis or bi-weekly basis for retraining with new data sounds good.
 
-3. When adding new data, it should be in the right format. Please look at the files data/forecast_data_15_20.csv for official forecast data formatting and data/2020S1.csv for Plumair device measurements formatting.
+3. When adding new data, it should be in the right format. Please look at the files ```data/forecast_data_15_20.csv``` for official forecast data formatting and ```data/2020S1.csv``` for Plumair device measurements formatting to be copy pasted in these files.
 
 4. For each timestep to predict, 5 models are required: 
     - 1 for wind speed, 1 for cosinus wind direction, 1 for sinus wind direction: these 3 models can then be used to get a scenario with the policy decided by Safi team
