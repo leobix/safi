@@ -15,6 +15,9 @@ parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFo
 parser.add_argument("--steps-in", type=int, default=48,
                             help="number of in time steps")
 
+parser.add_argument("--t_list", type=list, default=[1,3,6,9,12,15,18,21,24,27,30,33,36,39,42,45,48],
+                            help="list of prediction time steps")
+
 def run_xgb(steps_in, steps_out):
     #Parameter list:
     param_list =['speed','cos_wind_dir','sin_wind_dir']
@@ -87,7 +90,7 @@ if __name__ == "__main__":
     pred_angle=pd.DataFrame(columns={})
 
     #prediction steps
-    t_list=[1,3,6,9,12,15,18,21,24,27,30,33,36,39,42,45,48]
+    t_list= args.t_list #[1,3,6,9,12,15,18,21,24,27,30,33,36,39,42,45,48]
 
     steps_in = args.steps_in
 
