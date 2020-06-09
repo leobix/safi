@@ -43,6 +43,10 @@ parser.add_argument("--autobalance", action='store_true',
 parser.add_argument("--filename", type=str, default='v1',
                             help="filename for Trees")
 
+parser.add_argument("--class-criterion", type=str, default='misclassification',
+                            help="classification criterion, choose between misclassification, gini and entropy")
+
+
 
 
 def main(args):
@@ -104,6 +108,7 @@ def main(args):
         ),
         max_depth=range(args.min_depth, args.max_depth),
     )
+
     #Fit
     grid_speed.fit(X_train_reg, y_train_speed_reg)
     lnr_speed = grid_speed.get_learner()
@@ -142,7 +147,7 @@ def main(args):
     grid_scenarios = iai.GridSearch(
         iai.OptimalTreeClassifier(
             random_seed=1,
-            criterion='gini',
+            criterion = args.class_criterion
         ),
         max_depth=range(args.min_depth, args.max_depth),
     )
@@ -150,7 +155,7 @@ def main(args):
     grid_dangerous = iai.GridSearch(
         iai.OptimalTreeClassifier(
             random_seed=1,
-            criterion='gini',
+            criterion = args.class_criterion
         ),
         max_depth=range(args.min_depth, args.max_depth),
     )
@@ -169,7 +174,6 @@ def main(args):
         grid_scenarios_autobalance = iai.GridSearch(
             iai.OptimalTreeClassifier(
                 random_seed=1,
-                criterion='gini',
             ),
             max_depth=range(args.min_depth, args.max_depth),
         )
@@ -177,7 +181,6 @@ def main(args):
         grid_dangerous_autobalance = iai.GridSearch(
             iai.OptimalTreeClassifier(
                 random_seed=1,
-                criterion='gini',
             ),
             max_depth=range(args.min_depth, args.max_depth),
         )
