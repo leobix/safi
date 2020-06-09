@@ -26,6 +26,6 @@ Individual functions are coded in separate python files:
 
 Note: this function can take a long time to run in Jupyter notebook. We have written a python file called ```main_XGB.py``` which could be called and ran on a cluster to speed up running time.  
 
-###Disclaimers
+## Disclaimers
 
 This is a preliminary version of code. In the end we would provide a package requirement file and additional code for using our model in practice.
