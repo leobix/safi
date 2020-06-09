@@ -1,7 +1,7 @@
 This documentation serves the purpose to share current running codes and results, which can be turned into a beta version for testing phase. 
 
 Individual functions are coded in separate python files: 
-1. 'data_preparation.py' is the file containing functions to process measurements dataframe (data obtained by Plum air device) as well as forecast dataframe (official forecast from the weather agency). Specifically, it includes functions to: 
+1. ```data_preparation.py is the file containing functions to process measurements dataframe (data obtained by Plum air device) as well as forecast dataframe (official forecast from the weather agency). Specifically, it includes functions to: 
     - read raw CSV files for measurement(two per year from 2015S1 to 2020S1) and official government forecast data
     - clean data, fill missing values 
     - smooth wind angle into continuous data using cos and sin functions
