@@ -2,7 +2,7 @@ This documentation serves the purpose to share current running codes and results
 
 Individual functions are coded in separate python files: 
 1. ```utils/data_preparation.py``` is the file containing functions to process measurements dataframe (data obtained by Plum air device) as well as forecast dataframe (official forecast from the weather agency). Specifically, it includes functions to: 
-    - read raw CSV files for measurement(two per year from 2015S1 to 2020S1) and official government forecast data
+    - read raw CSV files for measurement (two per year from 2015 Semester 1 to 2020 Semester 1) and official government forecast data
     - clean data, fill missing values 
     - smooth wind angle into continuous data using cos and sin functions
     - extract some key features such as (time of the day, seasonality feature)  
@@ -24,4 +24,8 @@ Individual functions are coded in separate python files:
     - steps-in: number of past data for prediction, default = 48 (hours of data)
     - steps-out: what specific hour do you want to build a model for.
 
-Note: this function can take a long time to run in Jupyter notebook. We have written a python file called 'main_XGB.py' which could be called and ran on a cluster to speed up running time.  
+Note: this function can take a long time to run in Jupyter notebook. We have written a python file called ```main_XGB.py``` which could be called and ran on a cluster to speed up running time.  
+
+###Disclaimers
+
+This is a preliminary version of code. In the end we would provide a package requirement file and additional code for using our model in practice.
