@@ -13,5 +13,5 @@ def get_baselines(x_df, x, test_size = 0.2):
     _, _, _, y_test_baseline_cos_wind = train_test_split(x, y_baseline_cos_wind, test_size = test_size, shuffle = False)
     _, _, _, y_test_baseline_sin_wind = train_test_split(x, y_baseline_sin_wind, test_size = test_size, shuffle = False)
     y_baseline_dangerous_scenarios = get_all_dangerous_scenarios(y_test_baseline_speed, y_test_baseline_cos_wind, y_baseline_sin_wind)
-    y_baseline_scenarios = get_all_scenarios(y_test_baseline_speed, y_test_baseline_cos_wind, y_baseline_sin_wind, b_scenarios=True)
+    y_baseline_scenarios = get_all_scenarios(y_test_baseline_speed, y_test_baseline_cos_wind, y_test_baseline_sin_wind, b_scenarios=True)
     return y_test_baseline_speed, y_test_baseline_cos_wind, y_test_baseline_sin_wind, y_baseline_dangerous_scenarios, y_baseline_scenarios
