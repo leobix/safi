@@ -27,8 +27,4 @@ Individual functions are coded in separate python files:
     - steps-out: what specific hour do you want to build a model for.
 However, you need a license to use it, so the code won't work until then.
 
-Note: this function can take a long time to run in Jupyter notebook. We have written a python file called ```main_XGB.py``` which could be called and ran on a cluster to speed up running time.  
-
-## Disclaimers
-
-This is a preliminary version of code. In the end we would provide a package requirement file and additional code for using our model in practice.
+Note: these two last files can take a long time to run in local computer. They should be called and ran on a cluster to speed up running time.  
