@@ -20,11 +20,12 @@ Individual functions are coded in separate python files:
     
 4. ```main_XGB.py``` is the main function to be called to perform XGB regression and classification. You can amend the following arguments:
     - steps_in: number of past data for prediction, default = 48 
-    - t_list: prediction time steps, default = [1,3,6,9,12,15,18,21,24,27,30,33,36,39,42,45,48]
+    - t_list: time steps to be predicted, default = [1,3,6,9,12,15,18,21,24,27,30,33,36,39,42,45,48]
     
 5. ```main_OCT.py``` is the main function to be called to perform Optimal Trees for regression and classification. You can amend in particular the following arguments:
     - steps-in: number of past data for prediction, default = 48 (hours of data)
     - steps-out: what specific hour do you want to build a model for.
+However, you need a license to use it, so the code won't work until then.
 
 Note: this function can take a long time to run in Jupyter notebook. We have written a python file called ```main_XGB.py``` which could be called and ran on a cluster to speed up running time.  
 
