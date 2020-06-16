@@ -27,8 +27,16 @@ Individual functions are coded in separate python files:
     - steps-out: what specific hour do you want to build a model for.
 However, you need a license to use it, so the code won't work until then.
 
-Note: this function can take a long time to run in Jupyter notebook. We have written a python file called ```main_XGB.py``` which could be called and ran on a cluster to speed up running time.  
+# Important facts for deployment in Safi
 
-## Disclaimers
+1. Running these two last files can take a long time to run in a local computer (CPU). They should be called and ran on a cluster to speed up running time.  It takes less than 10 minutes to run ```main_XGB.py``` with 24 CPUs on a cluster. It takes around 12h to run ```main_OCT.py```with 24 CPUs.
 
-This is a preliminary version of code. In the end we would provide a package requirement file and additional code for using our model in practice.
+2. It is possible to retrain regularly the models and store the trained models for use. A weekly basis or bi-weekly basis for retraining with new data sounds good.
+
+3. When adding new data, it should be in the right format. Please look at the files ```data/forecast_data_15_20.csv``` for official forecast data formatting and ```data/2020S1.csv``` for Plumair device measurements formatting to be copy pasted in these files.
+
+4. For each timestep to predict, 5 models are required: 
+    - 1 for wind speed, 1 for cosinus wind direction, 1 for sinus wind direction: these 3 models can then be used to get a scenario with the policy decided by Safi team
+    - 1 for direct scenario classification, 1 for direct dangerous scenario classification: directly predicting the scenario yields better accuracy than passing through wind speed and wind direction predictions. The use of these models for confirmation or additional alert seems valuable.
+    
+5. We propose to use XGBoost which is a state-of-the-art method. We also propose Optimal Regression and Classification Trees that are equally good or better and also present the advantage of being interpretable. However, a license from InterpretableAI is required.
