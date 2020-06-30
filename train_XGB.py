@@ -41,23 +41,23 @@ def train_xgb(measurement, forecast, steps_in, steps_out):
     return
 
 
-    if __name__ == "__main__":
-        args = parser.parse_args()
-        print(args)
+if __name__ == "__main__":
+    args = parser.parse_args()
+    print(args)
 
-        #get data
-        measurement=prep.prepare_measurement()
-        forecast = prep.prepare_forecast()
-        #keep useful columns
+    #get data
+    measurement=prep.prepare_measurement()
+    forecast = prep.prepare_forecast()
+    #keep useful columns
 
-        measurement= measurement[['speed', 'cos_wind_dir', 'sin_wind_dir', 'temp', 'radiation', 'precip','season']]
-        print('measurement features used to construct x_df:', measurement.columns.to_list())
+    measurement= measurement[['speed', 'cos_wind_dir', 'sin_wind_dir', 'temp', 'radiation', 'precip','season']]
+    print('measurement features used to construct x_df:', measurement.columns.to_list())
 
-        #prediction steps
-        t_list= args.t_list # np.arange(1,49,1)
-        steps_in = args.steps_in #48
+    #prediction steps
+    t_list= args.t_list # np.arange(1,49,1)
+    steps_in = args.steps_in #48
 
-        #run three models per prediction step
-        for t in t_list:
-            #run model and save model
-            train_xgb(measurement, forecast, steps_in, t)
+    #run three models per prediction step
+    for t in t_list:
+        #run model and save model
+        train_xgb(measurement, forecast, steps_in, t)
