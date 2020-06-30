@@ -76,8 +76,8 @@ def get_mae(predict, true, baseline):
     speed_base=metrics.mean_absolute_error(baseline['speed'], true['speed'])
     angle = metrics.mean_absolute_error(predict['angle'], true['angle'])
     angle_base=metrics.mean_absolute_error(baseline['angle'], true['angle'])
-    return speed, speed_base, angle, angle_base 
-    
+    return speed, speed_base, angle, angle_base
+
 
 
 if __name__ == "__main__":
@@ -88,7 +88,7 @@ if __name__ == "__main__":
     measurement=prep.prepare_measurement()
     forecast = prep.prepare_forecast()
     #keep useful columns
-    measurement= measurement[['speed', 'cos_wind_dir', 'sin_wind_dir', 'temp', 'radiation', 'precip','season', 'am']]
+    measurement= measurement[['speed', 'cos_wind_dir', 'sin_wind_dir', 'temp', 'radiation', 'precip','season']]
 
     #set up empty dataframes
     accuracy = pd.DataFrame(columns={})
@@ -104,14 +104,14 @@ if __name__ == "__main__":
         #run model
         predict, true, base = run_xgb(steps_in, steps_out=t, max_depth = args.max_depth, n_estimators = args.n_estimators)
 
-        #calculate angles from sin and cosine  
+        #calculate angles from sin and cosine
         predict['angle'] = predict.apply(lambda row: utils.get_angle_in_degree(row['cos_wind_dir'],row['sin_wind_dir']),axis = 1)
         true['angle'] = true.apply(lambda row: utils.get_angle_in_degree(row['cos_wind_dir'],row['sin_wind_dir']), axis = 1)
         base['angle'] = base.apply(lambda row: utils.get_angle_in_degree(row['cos_wind_dir'],row['sin_wind_dir']), axis = 1)
 
-        #calculate mae for regression 
-        mae_speed, mae_speed_base, mae_angle, mae_angle_base = get_mae(predict, true, base) 
-        #calculate accuracy & auc for scenario prediction 
+        #calculate mae for regression
+        mae_speed, mae_speed_base, mae_angle, mae_angle_base = get_mae(predict, true, base)
+        #calculate accuracy & auc for scenario prediction
         pred_scenario, base_scenario  = scenario_accuracy(predict, true, base)
         pred_bin_accu, base_bin_accu, pred_bin_auc, base_bin_auc= binary_accuracy(predict, true, base)
 
@@ -135,6 +135,12 @@ if __name__ == "__main__":
         pred_angle = pd.concat([pred_angle, predict['angle'].rename('angle_t+'+str(t))], axis=1)
 
     #output results df
+<<<<<<< HEAD
     accuracy.to_csv('results/xgboost_accuracy_in_' + str(args.steps_in) + '_depth_' + str(args.max_depth) + '_estim_' + str(args.n_estimators) + '.csv', index=False)
     pred_angle.to_csv('results/xgboost_pred_angle_in_' + str(args.steps_in) + '_depth_' + str(args.max_depth) + '_estim_' + str(args.n_estimators) + '.csv', index=False)
     pred_speed.to_csv('results/xgboost_pred_speed_in_' + str(args.steps_in) + '_depth_' + str(args.max_depth) + '_estim_' + str(args.n_estimators) + '.csv', index=False)
+=======
+    accuracy.to_csv('results/xgboost_accuracy_in_' + str(args.steps_in) + '.csv', index=False)
+    pred_angle.to_csv('results/xgboost_pred_angle_in_' + str(args.steps_in) + '.csv', index=False)
+    pred_speed.to_csv('results/xgboost_pred_speed_in_' + str(args.steps_in) + '.csv', index=False)
+>>>>>>> old_code
