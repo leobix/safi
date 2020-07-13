@@ -123,24 +123,19 @@ if __name__ == "__main__":
                                           'base_scenario_accu': base_scenario,
                                           'xbg_binary_accu':pred_bin_accu,
                                           'base_binary_accu':base_bin_accu,
-                                            'xbg_binary_auc':pred_bin_auc,
+                                          'xbg_binary_auc':pred_bin_auc,
                                           'base_binary_auc':base_bin_auc,
-                                            'xbg_speed_mae': mae_speed,
-                                            'base_speed_mae': mae_speed_base,
-                                            'xgb_angle_mae': mae_angle,
-                                            'base_angle_mae': mae_angle_base}, ignore_index=True)
+                                          'xbg_speed_mae': mae_speed,
+                                          'base_speed_mae': mae_speed_base,
+                                          'xgb_angle_mae': mae_angle,
+                                          'base_angle_mae': mae_angle_base}, ignore_index=True)
         #record predicted speed
         pred_speed = pd.concat([pred_speed, predict['speed'].rename('speed_t+'+str(t))], axis=1)
         #record predicted angle
         pred_angle = pd.concat([pred_angle, predict['angle'].rename('angle_t+'+str(t))], axis=1)
 
     #output results df
-<<<<<<< HEAD
     accuracy.to_csv('results/xgboost_accuracy_in_' + str(args.steps_in) + '_depth_' + str(args.max_depth) + '_estim_' + str(args.n_estimators) + '.csv', index=False)
     pred_angle.to_csv('results/xgboost_pred_angle_in_' + str(args.steps_in) + '_depth_' + str(args.max_depth) + '_estim_' + str(args.n_estimators) + '.csv', index=False)
     pred_speed.to_csv('results/xgboost_pred_speed_in_' + str(args.steps_in) + '_depth_' + str(args.max_depth) + '_estim_' + str(args.n_estimators) + '.csv', index=False)
-=======
-    accuracy.to_csv('results/xgboost_accuracy_in_' + str(args.steps_in) + '.csv', index=False)
-    pred_angle.to_csv('results/xgboost_pred_angle_in_' + str(args.steps_in) + '.csv', index=False)
-    pred_speed.to_csv('results/xgboost_pred_speed_in_' + str(args.steps_in) + '.csv', index=False)
->>>>>>> old_code
+
