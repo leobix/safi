@@ -16,7 +16,7 @@ parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFo
 parser.add_argument("--steps-in", type=int, default=48,
                             help="number of in time steps")
 
-parser.add_argument("--t_list", type=list, default=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48],
+parser.add_argument("--t_list", type=int, nargs="+", default=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48],
                             help="list of prediction time steps")
 
 # main function to train xgb models and save models as pickle files
@@ -30,12 +30,10 @@ def train_xgb(measurement, forecast, steps_in, steps_out):
     baseline = pd.DataFrame(columns={'speed','cos_wind_dir','sin_wind_dir'})
 
     for param in param_list:
-
         #train on the entire data
         x_df, y_df, x, y = proc.prepare_x_y(measurement, forecast, steps_in, steps_out, param)
         xgb = XGBRegressor(max_depth = 5)
         xgb.fit(x, y)
-
         #save model into a pickle file
         pickle.dump(xgb, open('trained_models/'+str(param)+'_t_'+str(steps_out), 'wb'))
     return
@@ -48,8 +46,8 @@ if __name__ == "__main__":
     #get data
     measurement=prep.prepare_measurement()
     forecast = prep.prepare_forecast()
-    #keep useful columns
 
+    #keep selected features
     measurement= measurement[['speed', 'cos_wind_dir', 'sin_wind_dir', 'temp', 'radiation', 'precip','season']]
     print('measurement features used to construct x_df:', measurement.columns.to_list())
 
