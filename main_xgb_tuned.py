@@ -37,7 +37,7 @@ parser.add_argument("--n_estimators", type=int, default=100,
 parser.add_argument("--t_list", type=list, default=[1,3,6,9,12,15,18,21,24,27,30,33,36,39,42,45,48],
                             help="list of prediction time steps")
 
-def run_xgb(steps_in, steps_out, max_depth = 5, n_estimators = 100):
+def run_xgb(args, steps_out):
     #Parameter list:
     param_list =['speed','cos_wind_dir','sin_wind_dir']
 
@@ -46,9 +46,9 @@ def run_xgb(steps_in, steps_out, max_depth = 5, n_estimators = 100):
     baseline = pd.DataFrame(columns={'speed','cos_wind_dir','sin_wind_dir'})
 
     for param in param_list:
-        x_df, y_df, x, y = proc.prepare_x_y(measurement, forecast, steps_in, steps_out, param)
+        x_df, y_df, x, y = proc.prepare_x_y(measurement, forecast, args.steps_in, steps_out, param)
         X_train, X_test, y_train, y_test= train_test_split(x, y, test_size=0.2, shuffle = False)
-        xg = XGBRegressor(max_depth = max_depth, n_estimators = n_estimators)
+        xg = XGBRegressor(max_depth = args.max_depth, n_estimators = args.n_estimators, colsample_bytree = args.colsample_bytree, min_child_weight = args.min_child_weight, subsample = args.subsample, learning_rate = args.lr)
         xg.fit(X_train, y_train)
         y_hat = xg.predict(X_test)
 
