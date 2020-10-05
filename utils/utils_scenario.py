@@ -3,23 +3,24 @@ import numpy as np
 def get_angle_in_degree(cos, sin):
     #check if cos within reasonable range: 
     if (cos>=-1) & (cos <=1): 
-        angle = 360 *np.arccos(cos) /( 2*np.pi)
-        if sin >=0:
-            angle +=180
+        angle = 360 * np.arccos(cos) / (2*np.pi)
+        if sin <= 0:
+            angle += 180
     #check if sin within reasonable range:       
     elif (sin>=-1) & (sin <=1):
-        angle= 360 *np.arcsin(sin) /( 2*np.pi)
-        if cos <=0:
-            angle = 180 - angle 
+        angle = 360 * np.arcsin(sin) / (2*np.pi)
+        if sin <= 0:
+            angle += 360
     else:
         angle=0 
         print('cos and sin out of range, returned 0')
+    #because we care about the reverse angle for the scenarios
     return (angle + 180) % 360
 
 def test_angle(cos, sin):
     angle_cos = 360 *np.arccos(cos ) /( 2 *np.pi)
     if sin <=0:
-        angle_cos +=180
+        angle_cos += 180
     angle_sin = 360 *np.arcsin(sin ) /( 2 *np.pi)
     if cos <=0:
         angle_sin +=180
