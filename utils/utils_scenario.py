@@ -4,12 +4,12 @@ def get_angle_in_degree(cos, sin):
     #check if cos within reasonable range: 
     if (cos>=-1) & (cos <=1): 
         angle = 360 * np.arccos(cos) / (2*np.pi)
-        if sin <= 0:
+        if sin < 0:
             angle = 360 - angle
     #check if sin within reasonable range:       
     elif (sin>=-1) & (sin <=1):
         angle = 360 * np.arcsin(sin) / (2*np.pi)
-        if cos <= 0:
+        if cos < 0:
             angle = 180 - angle
         if angle < 0:
             angle += 360
