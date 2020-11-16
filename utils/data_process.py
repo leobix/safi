@@ -73,15 +73,15 @@ def get_past_n_steps(df, steps_in):
     return df_out
 
 def join_forecast(df, forecast, predict):
-    #crop out under 7 hour forecasts due to lag
-    forecast = forecast.loc[forecast['f_period']>=7]
+    #crop out under 8 hour forecasts due to lag
+    forecast = forecast.loc[forecast['f_period']>=8]
     #crop out forecast if forecast period is less than prediction period
-    forecast = forecast.loc[forecast['f_period']>=predict]
+    forecast = forecast.loc[forecast['f_period']>=predict+8]
     forecast = prep.keep_last_forecast(forecast)
     forecast = forecast.add_suffix('_forecast')
 
     #calculate forecast_time
-    df['forecast_time'] = df['present_time']+ timedelta(hours=predict)
+    df['forecast_time'] = df['present_time'] + timedelta(hours=predict)
 
     df_out = pd.merge(df, forecast, how = 'left', left_on = 'forecast_time', right_on ='f_date')
     df_out.fillna(value=0, inplace=True) #fill missing forecasts as 0
