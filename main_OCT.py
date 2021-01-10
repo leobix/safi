@@ -55,7 +55,7 @@ def main(args):
     forecast = prep.prepare_forecast()
 
     # keep useful columns
-    measurement = measurement[['speed', 'cos_wind_dir', 'sin_wind_dir', 'temp', 'radiation', 'precip', 'season', 'am']]
+    measurement = measurement[['speed', 'cos_wind_dir', 'sin_wind_dir', 'temp', 'radiation', 'precip', 'season']]
 
     # call data_process.py
 
@@ -65,8 +65,8 @@ def main(args):
     x_df, y_df, x, y_speed = proc.prepare_x_y(measurement, forecast, steps_in, steps_out, 'speed')
     _, _, _, y_cos = proc.prepare_x_y(measurement, forecast, steps_in, steps_out, 'cos_wind_dir')
     _, _, _, y_sin = proc.prepare_x_y(measurement, forecast, steps_in, steps_out, 'sin_wind_dir')
-    y_scenarios = get_all_scenarios(y_speed, y_cos, y_sin, b_scenarios=True)
-    y_dangerous = get_all_dangerous_scenarios(y_speed, y_cos, y_sin)
+    y_scenarios = get_all_scenarios(np.array(y_speed), np.array(y_cos), np.array(y_sin), b_scenarios=True)
+    y_dangerous = get_all_dangerous_scenarios(np.array(y_speed), np.array(y_cos), np.array(y_sin))
     X_train, X_test, y_train_dangerous, y_test_dangerous = train_test_split(x, y_dangerous, test_size=0.2,
                                                                             shuffle=False)
     _, _, y_train_scenarios, y_test_scenarios = train_test_split(x, y_scenarios, test_size=0.2, shuffle=False)
@@ -79,9 +79,11 @@ def main(args):
     names.remove('forecast_time')
     X_train2 = pd.DataFrame(X_train)
     X_train2.columns = names
-    (X_train_reg, y_train_speed_reg), _ = iai.split_data('regression', X_train2, y_train_speed, train_proportion=0.9999)
-    (_, y_train_cos_reg), _ = iai.split_data('regression', X_train2, y_train_cos, train_proportion=0.9999)
-    (_, y_train_sin_reg), _ = iai.split_data('regression', X_train2, y_train_sin, train_proportion=0.9999)
+    print(X_train2)
+    print(y_train_speed)
+    (X_train_reg, y_train_speed_reg), _ = iai.split_data('regression', X_train2, np.array(y_train_speed), train_proportion=0.9999)
+    (_, y_train_cos_reg), _ = iai.split_data('regression', X_train2, np.array(y_train_cos), train_proportion=0.9999)
+    (_, y_train_sin_reg), _ = iai.split_data('regression', X_train2, np.array(y_train_sin), train_proportion=0.9999)
     ###BASELINES
     y_test_baseline_speed, y_test_baseline_cos_wind, y_test_baseline_sin_wind, y_baseline_dangerous_scenarios, y_baseline_scenarios = get_baselines(
         x_df, x)
@@ -220,6 +222,8 @@ def main(args):
 
     print("Accuracy for baseline scenarios is:", accuracy_score(y_test_scenarios, y_baseline_scenarios))
     print("Naive baseline for dangerous is: ", 1 - np.sum(y_test_dangerous) / len(y_test_dangerous))
+    print(y_cos)
+    print(y_cos)
 
 if __name__ == "__main__":
    args = parser.parse_args()
