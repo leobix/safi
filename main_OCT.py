@@ -79,8 +79,6 @@ def main(args):
     names.remove('forecast_time')
     X_train2 = pd.DataFrame(X_train)
     X_train2.columns = names
-    print(X_train2)
-    print(y_train_speed)
     (X_train_reg, y_train_speed_reg), _ = iai.split_data('regression', X_train2, np.array(y_train_speed), train_proportion=0.9999)
     (_, y_train_cos_reg), _ = iai.split_data('regression', X_train2, np.array(y_train_cos), train_proportion=0.9999)
     (_, y_train_sin_reg), _ = iai.split_data('regression', X_train2, np.array(y_train_sin), train_proportion=0.9999)
@@ -115,16 +113,21 @@ def main(args):
     grid_speed.fit(X_train_reg, y_train_speed_reg)
     lnr_speed = grid_speed.get_learner()
     lnr_speed.write_html("Trees/" + args.filename + "_Regression_tree_speed_in" + str(args.steps_in) + "_out" + str(args.steps_out) + ".html")
+    lnr_speed.write_json("Trees/" + args.filename + "_Regression_tree_speed_in" + str(args.steps_in) + "_out" + str(args.steps_out) + ".json")
     print(grid_speed.get_grid_results())
 
     grid_cos.fit(X_train_reg, y_train_cos_reg)
     lnr_cos = grid_cos.get_learner()
     lnr_cos.write_html("Trees/" + args.filename + "_Regression_tree_cos_in" + str(args.steps_in) + "_out" + str(args.steps_out) +".html")
+    lnr_cos.write_json("Trees/" + args.filename + "_Regression_tree_cos_in" + str(args.steps_in) + "_out" + str(
+        args.steps_out) + ".json")
     print(grid_cos.get_grid_results())
 
     grid_sin.fit(X_train_reg, y_train_sin_reg)
     lnr_sin = grid_sin.get_learner()
     lnr_sin.write_html("Trees/" + args.filename + "_Regression_tree_sin_in" + str(args.steps_in) + "_out" + str(args.steps_out) +".html")
+    lnr_sin.write_json("Trees/" + args.filename + "_Regression_tree_sin_in" + str(args.steps_in) + "_out" + str(
+        args.steps_out) + ".json")
     print(grid_sin.get_grid_results())
 
     #Predict
@@ -165,11 +168,17 @@ def main(args):
     grid_scenarios.fit(X_train2, y_train_scenarios)
     lnr_scenarios = grid_scenarios.get_learner()
     lnr_scenarios.write_html("Trees/" + args.filename + "_Classification_tree_scenarios_in" + str(args.steps_in) + "_out" + str(args.steps_out) +".html")
+    lnr_scenarios.write_json(
+        "Trees/" + args.filename + "_Classification_tree_scenarios_in" + str(args.steps_in) + "_out" + str(
+            args.steps_out) + ".json")
     print(grid_scenarios.get_grid_results())
 
     grid_dangerous.fit(X_train2, y_train_dangerous)
     lnr_dangerous = grid_dangerous.get_learner()
     lnr_dangerous.write_html("Trees/" + args.filename + "_Classification_tree_dangerous_in" + str(args.steps_in) + "_out" + str(args.steps_out) +".html")
+    lnr_dangerous.write_json(
+        "Trees/" + args.filename + "_Classification_tree_dangerous_in" + str(args.steps_in) + "_out" + str(
+            args.steps_out) + ".json")
     print(grid_dangerous.get_grid_results())
 
     if args.autobalance:
@@ -191,12 +200,18 @@ def main(args):
         lnr_scenarios_autobalance = grid_scenarios_autobalance.get_learner()
         lnr_scenarios_autobalance.write_html(
             "Trees/" + args.filename + "_Classification_tree_scenarios_autobalance_in" + str(args.steps_in) + "_out" + str(args.steps_out) + ".html")
+        lnr_scenarios_autobalance.write_json(
+            "Trees/" + args.filename + "_Classification_tree_scenarios_autobalance_in" + str(
+                args.steps_in) + "_out" + str(args.steps_out) + ".json")
         print(grid_scenarios_autobalance.get_grid_results())
 
         grid_dangerous_autobalance.fit(X_train2, y_train_dangerous, sample_weight='autobalance')
         lnr_dangerous_autobalance = grid_dangerous_autobalance.get_learner()
         lnr_dangerous_autobalance.write_html(
             "Trees/" + args.filename + "_Classification_tree_dangerous_autobalance_in" + str(args.steps_in) + "_out" + str(args.steps_out) + ".html")
+        lnr_dangerous_autobalance.write_json(
+            "Trees/" + args.filename + "_Classification_tree_dangerous_autobalance_in" + str(
+                args.steps_in) + "_out" + str(args.steps_out) + ".json")
         print(grid_dangerous_autobalance.get_grid_results())
 
         print("Classification based scenarios autobalance, Accuracy: ",
