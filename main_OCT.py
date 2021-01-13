@@ -124,7 +124,7 @@ def main(args):
     )
 
     #Fit
-    grid_speed.fit(X_train_reg, y_train_speed_reg)
+    grid_speed.fit(X_train_reg, pd.DataFrame(y_train_speed_reg))
     lnr_speed = grid_speed.get_learner()
     lnr_speed.write_html("Trees/" + args.filename + "_Regression_tree_speed_in" + str(args.steps_in) + "_out" + str(args.steps_out) + ".html")
     lnr_speed.write_json("Trees/" + args.filename + "_Regression_tree_speed_in" + str(args.steps_in) + "_out" + str(args.steps_out) + ".json")
