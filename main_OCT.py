@@ -37,8 +37,14 @@ parser.add_argument("--max-depth", type=int, default=7,
 parser.add_argument("--local", action='store_true',
                             help="if used on local computer because of iai compatibility")
 
+parser.add_argument("--supercloud", action='store_true',
+                            help="if used on supercloud because of iai compatibility")
+
 parser.add_argument("--autobalance", action='store_true',
                             help="for data unbalance")
+
+parser.add_argument("--regression_sparsity", action='store_true',
+                            help="for using regression sparsity, regression_sparsity specifies whether to use linear regresssion predictions in the leaves of the tree. The default value is 0 indicating only a constant term will be used for prediction. Set to :all to fit a linear regression in each leaf.")
 
 parser.add_argument("--filename", type=str, default='v1',
                             help="filename for Trees")
@@ -86,6 +92,11 @@ def main(args):
     y_test_baseline_speed, y_test_baseline_cos_wind, y_test_baseline_sin_wind, y_baseline_dangerous_scenarios, y_baseline_scenarios = get_baselines(
         x_df, x)
 
+    if args.regression_sparsity:
+        regression_sparsity = 'all'
+    else:
+        regression_sparsity = '0'
+
     ###Regression
     #Grids
     grid_speed = iai.GridSearch(
@@ -93,6 +104,7 @@ def main(args):
             random_seed=1,
         ),
         max_depth=range(args.min_depth, args.max_depth),
+        regression_sparsity = regression_sparsity,
     )
 
     grid_cos = iai.GridSearch(
@@ -100,6 +112,7 @@ def main(args):
             random_seed=1,
         ),
         max_depth=range(args.min_depth, args.max_depth),
+        regression_sparsity=regression_sparsity,
     )
 
     grid_sin = iai.GridSearch(
@@ -107,6 +120,7 @@ def main(args):
             random_seed=1,
         ),
         max_depth=range(args.min_depth, args.max_depth),
+        regression_sparsity=regression_sparsity,
     )
 
     #Fit
@@ -245,6 +259,8 @@ if __name__ == "__main__":
    print(args)
    if args.local:
         Julia(compiled_modules=False)
+   elif args.supercloud:
+       Julia(sysimage='/home/gridsan/groups/IAI/images/2.0.0/julia-1.4.2/sys.so', compiled_modules = False)
    else:
         Julia(sysimage='../sys.so')
    from interpretableai import iai
