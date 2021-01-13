@@ -79,7 +79,7 @@ def main(args):
     _, _, y_train_speed, y_test_speed = train_test_split(x, y_speed, test_size=0.2, shuffle=False)
     _, _, y_train_cos, y_test_cos = train_test_split(x, y_cos, test_size=0.2, shuffle=False)
     _, _, y_train_sin, y_test_sin = train_test_split(x, y_sin, test_size=0.2, shuffle=False)
-
+    #
     names = list(x_df.columns)
     names.remove('present_time')
     names.remove('forecast_time')
@@ -105,6 +105,7 @@ def main(args):
         ),
         max_depth=range(args.min_depth, args.max_depth),
         regression_sparsity = regression_sparsity,
+        #minbucket = [10, 20],
     )
 
     grid_cos = iai.GridSearch(
@@ -113,6 +114,7 @@ def main(args):
         ),
         max_depth=range(args.min_depth, args.max_depth),
         regression_sparsity=regression_sparsity,
+        #minbucket=[10, 20],
     )
 
     grid_sin = iai.GridSearch(
@@ -121,23 +123,24 @@ def main(args):
         ),
         max_depth=range(args.min_depth, args.max_depth),
         regression_sparsity=regression_sparsity,
+        #minbucket=[10, 20],
     )
 
     #Fit
-    grid_speed.fit(X_train_reg, y_train_speed_reg)
+    grid_speed.fit(X_train_reg, np.array(y_train_speed_reg).reshape(-1))
     lnr_speed = grid_speed.get_learner()
     lnr_speed.write_html("Trees/" + args.filename + "_Regression_tree_speed_in" + str(args.steps_in) + "_out" + str(args.steps_out) + ".html")
     lnr_speed.write_json("Trees/" + args.filename + "_Regression_tree_speed_in" + str(args.steps_in) + "_out" + str(args.steps_out) + ".json")
     print(grid_speed.get_grid_results())
 
-    grid_cos.fit(X_train_reg, y_train_cos_reg)
+    grid_cos.fit(X_train_reg, np.array(y_train_cos_reg).reshape(-1))
     lnr_cos = grid_cos.get_learner()
     lnr_cos.write_html("Trees/" + args.filename + "_Regression_tree_cos_in" + str(args.steps_in) + "_out" + str(args.steps_out) +".html")
     lnr_cos.write_json("Trees/" + args.filename + "_Regression_tree_cos_in" + str(args.steps_in) + "_out" + str(
         args.steps_out) + ".json")
     print(grid_cos.get_grid_results())
 
-    grid_sin.fit(X_train_reg, y_train_sin_reg)
+    grid_sin.fit(X_train_reg, np.array(y_train_sin_reg).reshape(-1))
     lnr_sin = grid_sin.get_learner()
     lnr_sin.write_html("Trees/" + args.filename + "_Regression_tree_sin_in" + str(args.steps_in) + "_out" + str(args.steps_out) +".html")
     lnr_sin.write_json("Trees/" + args.filename + "_Regression_tree_sin_in" + str(args.steps_in) + "_out" + str(
