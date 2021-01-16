@@ -97,7 +97,7 @@ def main(args):
         x_df, x)
 
     if args.regression_sparsity:
-        regression_sparsity = 'all'
+        regression_sparsity = ['all','0']
     else:
         regression_sparsity = 0
 
