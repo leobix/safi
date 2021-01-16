@@ -15,6 +15,7 @@ from utils.utils_baselines import *
 
 from sklearn.metrics import mean_absolute_error
 from sklearn.metrics import accuracy_score
+from sklearn.metrics import roc_auc_score
 
 ##IAI
 from julia import Julia
@@ -39,6 +40,9 @@ parser.add_argument("--local", action='store_true',
 
 parser.add_argument("--supercloud", action='store_true',
                             help="if used on supercloud because of iai compatibility")
+
+parser.add_argument("--classification", action='store_true',
+                            help="classification models will run")
 
 parser.add_argument("--autobalance", action='store_true',
                             help="for data unbalance")
@@ -129,22 +133,22 @@ def main(args):
     #Fit
     grid_speed.fit(X_train_reg, np.array(y_train_speed_reg).reshape(-1))
     lnr_speed = grid_speed.get_learner()
-    lnr_speed.write_html("Trees/" + args.filename + "_Regression_tree_speed_in" + str(args.steps_in) + "_out" + str(args.steps_out) + ".html")
-    lnr_speed.write_json("Trees/" + args.filename + "_Regression_tree_speed_in" + str(args.steps_in) + "_out" + str(args.steps_out) + ".json")
+    lnr_speed.write_html("Trees/" + args.filename + "_Regression_tree_speed_in" + str(args.steps_in) + "_out" + str(args.steps_out) + "_sparsity_" + str(regression_sparsity) +".html")
+    lnr_speed.write_json("Trees/" + args.filename + "_Regression_tree_speed_in" + str(args.steps_in) + "_out" + str(args.steps_out) + "_sparsity_" + str(regression_sparsity)  + ".json")
     print(grid_speed.get_grid_results())
 
     grid_cos.fit(X_train_reg, np.array(y_train_cos_reg).reshape(-1))
     lnr_cos = grid_cos.get_learner()
-    lnr_cos.write_html("Trees/" + args.filename + "_Regression_tree_cos_in" + str(args.steps_in) + "_out" + str(args.steps_out) +".html")
+    lnr_cos.write_html("Trees/" + args.filename + "_Regression_tree_cos_in" + str(args.steps_in) + "_out" + str(args.steps_out) + "_sparsity_" + str(regression_sparsity) +".html")
     lnr_cos.write_json("Trees/" + args.filename + "_Regression_tree_cos_in" + str(args.steps_in) + "_out" + str(
-        args.steps_out) + ".json")
+        args.steps_out)+ "_sparsity_" + str(regression_sparsity) + ".json")
     print(grid_cos.get_grid_results())
 
     grid_sin.fit(X_train_reg, np.array(y_train_sin_reg).reshape(-1))
     lnr_sin = grid_sin.get_learner()
-    lnr_sin.write_html("Trees/" + args.filename + "_Regression_tree_sin_in" + str(args.steps_in) + "_out" + str(args.steps_out) +".html")
+    lnr_sin.write_html("Trees/" + args.filename + "_Regression_tree_sin_in" + str(args.steps_in) + "_out" + str(args.steps_out) + "_sparsity_" + str(regression_sparsity)  +".html")
     lnr_sin.write_json("Trees/" + args.filename + "_Regression_tree_sin_in" + str(args.steps_in) + "_out" + str(
-        args.steps_out) + ".json")
+        args.steps_out) + "_sparsity_" + str(regression_sparsity) + ".json")
     print(grid_sin.get_grid_results())
 
     #Predict
@@ -164,96 +168,107 @@ def main(args):
     print("MAE sin is: ", mean_absolute_error(y_test_sin, y_hat_sin))
     print("MAE baseline sin is: ", mean_absolute_error(y_test_sin, y_test_baseline_sin_wind))
 
-    ###Classification
-    #Grids
-    grid_scenarios = iai.GridSearch(
-        iai.OptimalTreeClassifier(
-            random_seed=1,
-            criterion = args.class_criterion
-        ),
-        max_depth=range(args.min_depth, args.max_depth),
-    )
-
-    grid_dangerous = iai.GridSearch(
-        iai.OptimalTreeClassifier(
-            random_seed=1,
-            criterion = args.class_criterion
-        ),
-        max_depth=range(args.min_depth, args.max_depth),
-    )
-
-    grid_scenarios.fit(X_train2, y_train_scenarios)
-    lnr_scenarios = grid_scenarios.get_learner()
-    lnr_scenarios.write_html("Trees/" + args.filename + "_Classification_tree_scenarios_in" + str(args.steps_in) + "_out" + str(args.steps_out) +".html")
-    lnr_scenarios.write_json(
-        "Trees/" + args.filename + "_Classification_tree_scenarios_in" + str(args.steps_in) + "_out" + str(
-            args.steps_out) + ".json")
-    print(grid_scenarios.get_grid_results())
-
-    grid_dangerous.fit(X_train2, y_train_dangerous)
-    lnr_dangerous = grid_dangerous.get_learner()
-    lnr_dangerous.write_html("Trees/" + args.filename + "_Classification_tree_dangerous_in" + str(args.steps_in) + "_out" + str(args.steps_out) +".html")
-    lnr_dangerous.write_json(
-        "Trees/" + args.filename + "_Classification_tree_dangerous_in" + str(args.steps_in) + "_out" + str(
-            args.steps_out) + ".json")
-    print(grid_dangerous.get_grid_results())
-
-    if args.autobalance:
-        grid_scenarios_autobalance = iai.GridSearch(
-            iai.OptimalTreeClassifier(
-                random_seed=1,
-            ),
-            max_depth=range(args.min_depth, args.max_depth),
-        )
-
-        grid_dangerous_autobalance = iai.GridSearch(
-            iai.OptimalTreeClassifier(
-                random_seed=1,
-            ),
-            max_depth=range(args.min_depth, args.max_depth),
-        )
-
-        grid_scenarios_autobalance.fit(X_train2, y_train_scenarios, sample_weight='autobalance')
-        lnr_scenarios_autobalance = grid_scenarios_autobalance.get_learner()
-        lnr_scenarios_autobalance.write_html(
-            "Trees/" + args.filename + "_Classification_tree_scenarios_autobalance_in" + str(args.steps_in) + "_out" + str(args.steps_out) + ".html")
-        lnr_scenarios_autobalance.write_json(
-            "Trees/" + args.filename + "_Classification_tree_scenarios_autobalance_in" + str(
-                args.steps_in) + "_out" + str(args.steps_out) + ".json")
-        print(grid_scenarios_autobalance.get_grid_results())
-
-        grid_dangerous_autobalance.fit(X_train2, y_train_dangerous, sample_weight='autobalance')
-        lnr_dangerous_autobalance = grid_dangerous_autobalance.get_learner()
-        lnr_dangerous_autobalance.write_html(
-            "Trees/" + args.filename + "_Classification_tree_dangerous_autobalance_in" + str(args.steps_in) + "_out" + str(args.steps_out) + ".html")
-        lnr_dangerous_autobalance.write_json(
-            "Trees/" + args.filename + "_Classification_tree_dangerous_autobalance_in" + str(
-                args.steps_in) + "_out" + str(args.steps_out) + ".json")
-        print(grid_dangerous_autobalance.get_grid_results())
-
-        print("Classification based scenarios autobalance, Accuracy: ",
-              lnr_scenarios_autobalance.score(X_test, y_test_scenarios, criterion='misclassification'))
-
-        print("Classification based dangerous autobalance: Accuracy: ",
-              lnr_dangerous_autobalance.score(X_test, y_test_dangerous, criterion='misclassification'))
-
-        print("Classification based dangerous autobalance: AUC: ",
-              lnr_dangerous_autobalance.score(X_test, y_test_dangerous, criterion='auc'))
-
+    print("\nRegression Based Scores:")
     print("Regression based scenarios, Accuracy:",
           accuracy_score(y_test_scenarios, y_hat_scenario_from_regression))
-
-    print("Classification based scenarios, Accuracy: ", lnr_scenarios.score(X_test, y_test_scenarios, criterion='misclassification'))
-    print("Classification based dangerous: Accuracy: ", lnr_dangerous.score(X_test, y_test_dangerous, criterion='misclassification'))
-
-    print("Classification based dangerous: AUC: ", lnr_dangerous.score(X_test, y_test_dangerous, criterion='auc'))
-
-    print("Accuracy for baseline dangerous is:", accuracy_score(y_test_dangerous, y_baseline_dangerous_scenarios))
-
     print("Regression based dangerous, Accuracy:", accuracy_score(y_test_dangerous, y_hat_dangerous_from_regression))
+    print("Regression based dangerous, AUC:", roc_auc_score(y_test_dangerous, y_hat_dangerous_from_regression))
 
-    print("Accuracy for baseline scenarios is:", accuracy_score(y_test_scenarios, y_baseline_scenarios))
-    print("Naive baseline for dangerous is: ", 1 - np.sum(y_test_dangerous) / len(y_test_dangerous))
+    if args.classification:
+
+        ###Classification
+        #Grids
+        grid_scenarios = iai.GridSearch(
+            iai.OptimalTreeClassifier(
+                random_seed=1,
+                criterion = args.class_criterion
+            ),
+            max_depth=range(args.min_depth, args.max_depth),
+        )
+
+        grid_dangerous = iai.GridSearch(
+            iai.OptimalTreeClassifier(
+                random_seed=1,
+                criterion = args.class_criterion
+            ),
+            max_depth=range(args.min_depth, args.max_depth),
+        )
+
+        grid_scenarios.fit(X_train2, y_train_scenarios)
+        lnr_scenarios = grid_scenarios.get_learner()
+        lnr_scenarios.write_html("Trees/" + args.filename + "_Classification_tree_scenarios_in" + str(args.steps_in) + "_out" + str(args.steps_out) +".html")
+        lnr_scenarios.write_json(
+            "Trees/" + args.filename + "_Classification_tree_scenarios_in" + str(args.steps_in) + "_out" + str(
+                args.steps_out) + ".json")
+        print(grid_scenarios.get_grid_results())
+
+        grid_dangerous.fit(X_train2, y_train_dangerous)
+        lnr_dangerous = grid_dangerous.get_learner()
+        lnr_dangerous.write_html("Trees/" + args.filename + "_Classification_tree_dangerous_in" + str(args.steps_in) + "_out" + str(args.steps_out) +".html")
+        lnr_dangerous.write_json(
+            "Trees/" + args.filename + "_Classification_tree_dangerous_in" + str(args.steps_in) + "_out" + str(
+                args.steps_out) + ".json")
+        print(grid_dangerous.get_grid_results())
+
+        if args.autobalance:
+            grid_scenarios_autobalance = iai.GridSearch(
+                iai.OptimalTreeClassifier(
+                    random_seed=1,
+                ),
+                max_depth=range(args.min_depth, args.max_depth),
+            )
+
+            grid_dangerous_autobalance = iai.GridSearch(
+                iai.OptimalTreeClassifier(
+                    random_seed=1,
+                ),
+                max_depth=range(args.min_depth, args.max_depth),
+            )
+
+            grid_scenarios_autobalance.fit(X_train2, y_train_scenarios, sample_weight='autobalance')
+            lnr_scenarios_autobalance = grid_scenarios_autobalance.get_learner()
+            lnr_scenarios_autobalance.write_html(
+                "Trees/" + args.filename + "_Classification_tree_scenarios_autobalance_in" + str(args.steps_in) + "_out" + str(args.steps_out) + ".html")
+            lnr_scenarios_autobalance.write_json(
+                "Trees/" + args.filename + "_Classification_tree_scenarios_autobalance_in" + str(
+                    args.steps_in) + "_out" + str(args.steps_out) + ".json")
+            print(grid_scenarios_autobalance.get_grid_results())
+
+            grid_dangerous_autobalance.fit(X_train2, y_train_dangerous, sample_weight='autobalance')
+            lnr_dangerous_autobalance = grid_dangerous_autobalance.get_learner()
+            lnr_dangerous_autobalance.write_html(
+                "Trees/" + args.filename + "_Classification_tree_dangerous_autobalance_in" + str(args.steps_in) + "_out" + str(args.steps_out) + ".html")
+            lnr_dangerous_autobalance.write_json(
+                "Trees/" + args.filename + "_Classification_tree_dangerous_autobalance_in" + str(
+                    args.steps_in) + "_out" + str(args.steps_out) + ".json")
+            print(grid_dangerous_autobalance.get_grid_results())
+
+            print("Classification based scenarios autobalance, Accuracy: ",
+                  lnr_scenarios_autobalance.score(X_test, y_test_scenarios, criterion='misclassification'))
+
+            print("Classification based dangerous autobalance: Accuracy: ",
+                  lnr_dangerous_autobalance.score(X_test, y_test_dangerous, criterion='misclassification'))
+
+            print("Classification based dangerous autobalance: AUC: ",
+                  lnr_dangerous_autobalance.score(X_test, y_test_dangerous, criterion='auc'))
+
+        print("Baselines:")
+        print("Baseline scenarios, Accuracy:", accuracy_score(y_test_scenarios, y_baseline_scenarios))
+        print("Naive Baseline dangerous, Accuracy: ", 1 - np.sum(y_test_dangerous) / len(y_test_dangerous))
+        print("Baseline dangerous, Accuracy:", accuracy_score(y_test_dangerous, y_baseline_dangerous_scenarios))
+        print("Baseline dangerous, AUC:", roc_auc_score(y_test_dangerous, y_baseline_dangerous_scenarios))
+
+        print("\nRegression Based Scores:")
+        print("Regression based scenarios, Accuracy:",
+              accuracy_score(y_test_scenarios, y_hat_scenario_from_regression))
+        print("Regression based dangerous, Accuracy:", accuracy_score(y_test_dangerous, y_hat_dangerous_from_regression))
+        print("Regression based dangerous, AUC:", roc_auc_score(y_test_dangerous, y_hat_dangerous_from_regression))
+
+        print("\nClassification Based Scores:")
+        print("Classification based scenarios, Accuracy: ", lnr_scenarios.score(X_test, y_test_scenarios, criterion='misclassification'))
+        print("Classification based dangerous, Accuracy: ", lnr_dangerous.score(X_test, y_test_dangerous, criterion='misclassification'))
+        print("Classification based dangerous, AUC: ", lnr_dangerous.score(X_test, y_test_dangerous, criterion='auc'))
+
 
 if __name__ == "__main__":
    args = parser.parse_args()
