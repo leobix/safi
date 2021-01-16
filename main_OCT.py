@@ -95,7 +95,7 @@ def main(args):
     if args.regression_sparsity:
         regression_sparsity = 'all'
     else:
-        regression_sparsity = '0'
+        regression_sparsity = 0
 
     ###Regression
     #Grids
@@ -254,8 +254,6 @@ def main(args):
 
     print("Accuracy for baseline scenarios is:", accuracy_score(y_test_scenarios, y_baseline_scenarios))
     print("Naive baseline for dangerous is: ", 1 - np.sum(y_test_dangerous) / len(y_test_dangerous))
-    print(y_cos)
-    print(y_cos)
 
 if __name__ == "__main__":
    args = parser.parse_args()
