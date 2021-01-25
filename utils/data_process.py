@@ -22,7 +22,9 @@ output:
 def prepare_x_y(measurement, forecast, past_n_steps, pred_period, param='speed'):
 
     # concatenate past_n_steps data
-    df1=get_past_n_steps(measurement, past_n_steps)
+    #measurement_sub: no categorical variables (i.e. scneario_num, and dangerous scenario)
+    measurement_sub = measurement[['speed', 'cos_wind_dir', 'sin_wind_dir', 'temp', 'radiation', 'precip','season']]
+    df1=get_past_n_steps(measurement_sub, past_n_steps)
 
     # add forecast data
     x_df = join_forecast(df1, forecast, pred_period)

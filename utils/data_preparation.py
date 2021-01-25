@@ -4,6 +4,7 @@ from pandas import read_csv
 from pandas import DataFrame
 from pandas import concat
 from datetime import date, datetime, timedelta
+from utils import utils_scenario as utils
 
 
 """
@@ -20,6 +21,7 @@ def prepare_measurement():
     df= smooth_wind_dir(df)
     df= hourly_avg(df)
     df = generate_season(df)
+    df = generate_scenario(df)
     #these features are not used
     # df = generate_daily(df)
     # df = generate_am_pm(df)
@@ -36,9 +38,9 @@ def prepare_forecast(keep_last_forecast=False):
     df = get_forecast()
     df = format_forecast(df)
     df = smooth_wind_dir(df)
+    df = generate_scenario(df)
     if keep_last_forecast:
         df= keep_last_forecast(df)
-
     return df
 
 
@@ -103,6 +105,11 @@ def hourly_avg(df): #df has index datetime
     # arithmetic average for everything else:
     temp = df[['speed','temp','radiation','precip']]
     df2 = temp.resample('1H', label='right').mean()
+
+    # #get the scenario number and dangerous scenario: wost scenario during the hourly duration
+    # temp = df[['scenario_num', 'dangerous']]
+    # df3 = temp.resample('1H', label='right').max()
+
     df_out = pd.concat([df1, df2], axis=1)
     return df_out
 
@@ -135,6 +142,51 @@ def generate_season(df):
     df.drop(['month'], axis=1, inplace=True)
     print('generate seasonality categorical feature')
     return df
+
+# # get the scenario + dagnerous vs. not dangerous binary classification
+# def generate_scenario_string(df):
+#     df['dangerous'] = df.apply(lambda x: danger_map(x['scenario']), axis=1)
+#     df['scenario_num'] = df.apply(lambda x: scenario_map(x['scenario'], b_scenarios=True), axis=1)
+#     return df
+#
+# #map scenario to number encoding: 1 - 6
+# def scenario_map(string, b_scenarios=True):
+#     if 'S1' == string:
+#         out = 1
+#     elif 'S2' ==  string:
+#         out = 2
+#     elif 'S2b' == string:
+#         out = 2 + 1*b_scenarios
+#     elif 'S3' ==  string:
+#         out = 3+ b_scenarios
+#     elif 'S3b' ==  string:
+#         out = 3+ 2* b_scenarios
+#     elif 'S4' ==  string:
+#         out = 4+ 2* b_scenarios
+#     else:
+#         out =0
+#     return out
+#
+# def danger_map(string, b_scenarios=True):
+#     if string in ['S1', 'S2', 'S2b']:
+#         out = 0
+#     elif string in ['S3', 'S3b', 'S4']:
+#         out = 1
+#     else:
+#         out =0
+#     return out
+
+#generate scenario for forecast
+def generate_scenario(df):
+    df['scenario'] = df.apply(
+    lambda x: utils.get_scenario(x['speed'], x['cos_wind_dir'],
+                                 x['sin_wind_dir'], b_scenarios=True), axis=1)
+    df['dangerous'] = df.apply(
+    lambda x: utils.get_dangerous_scenario(x['speed'], x['cos_wind_dir'],
+                                 x['sin_wind_dir']), axis=1)
+    return df
+
+
 #
 #
 # def generate_am_pm(df):
@@ -171,7 +223,7 @@ def keep_last_forecast (df):
     df.sort_values(by=['f_date','p_date'], inplace=True)
     df.drop_duplicates(subset = 'f_date', keep = 'last', inplace=True)
     df.set_index('f_date', inplace=True)
-    df.drop(['p_date','f_period'], axis=1, inplace=True)
+    df.drop(['p_date'], axis=1, inplace=True)
     return df
 
 
