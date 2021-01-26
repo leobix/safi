@@ -3,6 +3,8 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn import metrics
 from xgboost import XGBRegressor, XGBClassifier
+from sklearn.model_selection import StratifiedKFold, GridSearchCV, KFold
+
 import warnings
 warnings.filterwarnings('ignore')
 
@@ -34,7 +36,7 @@ parser.add_argument("--steps-in", type=int, default=48,
 # parser.add_argument("--n_estimators", type=int, default=100,
 #                             help="number of estimators of XGB")
 
-parser.add_argument("--t_list", type=list, default=[1,2,3,4,5,6] #9,12,15,18,21,24,27,30,33,36,39,42,45,48],
+parser.add_argument("--t_list", type=int, nargs="+", default=[1,2,3,4,5,6],  #9,12,15,18,21,24,27,30,33,36,39,42,45,48],
                             help="list of prediction time steps")
 
 def run_xgb(steps_in, steps_out):
@@ -48,19 +50,21 @@ def run_xgb(steps_in, steps_out):
 
     for param in param_list:
         x_df, y_df, x, y = proc.prepare_x_y(measurement, forecast, steps_in, steps_out, param)
-        X_train, X_test, y_train, y_test= train_test_split(x, y, test_size=0.2, shuffle = False)
+        x_train, x_test, y_train, y_test= train_test_split(x, y, test_size=0.2, shuffle = False)
 
         # @Leonard: I added new parameters here for scenario and dangerous, call classification algo
         #gridsearch
         if param in ['speed','cos_wind_dir','sin_wind_dir']:
             xgb_model = XGBRegressor()
+            splitter = KFold(n_splits=5, shuffle=True)
+            print(param)
         if param in ['scenario', 'dangerous']:
             xgb_model = XGBClassifier()
+            splitter = StratifiedKFold(n_splits=5, shuffle = True)
 
-        skf = StratifiedKFold(n_splits=10, shuffle = True)
         grid = GridSearchCV(xgb_model,
                             param_grid = grid_params,
-                            cv = skf.split(x_train, y_train))
+                            cv = splitter.split(x_train, y_train))
         grid.fit(x_train, y_train)
         best_model = grid.best_estimator_
 
@@ -129,9 +133,17 @@ if __name__ == "__main__":
 
     steps_in = args.steps_in
 
+    #parameter search space
+    grid_params = {
+         'max_depth':[4,5,6],
+         'min_child_weight':[4,5,6],
+         'gamma': [0, 0.05],
+         'learning_rate': [0.1,0.2],
+         'n_estimators': [100, 150]}
+
     for t in t_list:
         #run model
-        predict, true, base = run_xgb(steps_in, steps_out=t, max_depth = args.max_depth, n_estimators = args.n_estimators)
+        predict, true, base = run_xgb(steps_in, steps_out=t)
 
         #calculate angles from sin and cosine
         predict['angle'] = predict.apply(lambda row: utils.get_angle_in_degree(row['cos_wind_dir'],row['sin_wind_dir']),axis = 1)
@@ -150,19 +162,19 @@ if __name__ == "__main__":
         pred_dangerous= metrics.roc_auc_score(predict['dangerous'], true['dangerous']).round(3)
         base_dangerous= metrics.roc_auc_score(base['dangerous'], true['dangerous']).round(3)
 
-        #record accuracy 
+        #record accuracy
         accuracy = accuracy.append({'past_n_steps': str(steps_in),
                                           'pred_n_steps': str(t),
                                           'xgb_scenario_accu': pred_scenario,
-                                          'forecast_scenario_accu': base_scenario,
+                                          'benchmark_scenario_accu': base_scenario,
                                           'xbg_binary_rocauc':pred_dangerous,
-                                          'forecast_binary_rocauc':base_dangerous,
+                                          'benchmark_binary_rocauc':base_dangerous,
                                           # 'xbg_binary_auc':pred_bin_auc,
                                           # 'base_binary_auc':base_bin_auc,
                                           'xbg_speed_mae': mae_speed,
-                                          'base_speed_mae': mae_speed_base,
+                                          'benchmark_speed_mae': mae_speed_base,
                                           'xgb_angle_mae': mae_angle,
-                                          'base_angle_mae': mae_angle_base}, ignore_index=True)
+                                          'benchmark_angle_mae': mae_angle_base}, ignore_index=True)
         #record predicted speed
         pred_speed = pd.concat([pred_speed, predict['speed'].rename('speed_t+'+str(t))], axis=1)
         #record predicted angle
