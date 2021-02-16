@@ -263,44 +263,44 @@ def main(args):
             print("Classification based dangerous, AUC: ",
                   lnr_dangerous_autobalance.score(X_test, y_test_dangerous, criterion='auc'))
             print("Classification based dangerous, F1 macro: ", f1_score(y_test_dangerous, lnr_dangerous_autobalance.predict(X_test), average = 'macro'))
-            print("Classification based scenarios, Confusion Matrix:\n ",
+            print("Classification based scenarios, Confusion Matrix:\n",
                   confusion_matrix(y_test_scenarios, lnr_scenarios_autobalance.predict(X_test)))
-            print("Classification based dangerous, Confusion Matrix:\n ",
+            print("Classification based dangerous, Confusion Matrix:\n",
                   confusion_matrix(y_test_dangerous, lnr_dangerous_autobalance.predict(X_test)))
 
         print("\nBaselines:")
         print("Numtech scenarios, Accuracy:", accuracy_score(y_test_scenarios, y_baseline_scenarios))
         print("Naive Baseline dangerous, Accuracy: ", 1 - np.sum(y_test_dangerous) / len(y_test_dangerous))
-        print("Numtech scenarios, F1 macro: ", f1_score(y_test_dangerous, y_baseline_scenarios))
-        print("Numtech scenarios, Confusion Matrix:\n ",
+        print("Numtech scenarios, F1 macro: ", f1_score(y_test_dangerous, y_baseline_scenarios, average = 'macro'))
+        print("Numtech scenarios, Confusion Matrix:\n",
               confusion_matrix(y_test_dangerous, y_baseline_scenarios))
         print("Numtech dangerous, Accuracy:", accuracy_score(y_test_dangerous, y_baseline_dangerous_scenarios))
         print("Numtech dangerous, AUC:", roc_auc_score(y_test_dangerous, y_baseline_dangerous_scenarios))
-        print("Numtech dangerous, F1 macro: ", f1_score(y_test_dangerous, y_baseline_dangerous_scenarios))
-        print("Numtech dangerous, Confusion Matrix:\n ",
+        print("Numtech dangerous, F1 macro: ", f1_score(y_test_dangerous, y_baseline_dangerous_scenarios, average = 'macro'))
+        print("Numtech dangerous, Confusion Matrix:\n",
               confusion_matrix(y_test_dangerous, y_baseline_dangerous_scenarios))
 
         if args.regression:
             print("\nRegression Based Scores:")
-            print("Regression based scenarios, Accuracy:",
+            print("Scenarios, Accuracy:",
                   accuracy_score(y_test_scenarios, y_hat_scenario_from_regression))
-            print("Regression based scenarios, F1 macro: ", f1_score(y_test_scenarios, y_hat_scenario_from_regression))
+            print("Scenarios, F1 macro: ", f1_score(y_test_scenarios, y_hat_scenario_from_regression, average = 'macro'))
 
-            print("Regression based dangerous, Accuracy:", accuracy_score(y_test_dangerous, y_hat_dangerous_from_regression))
-            print("Regression based dangerous, AUC:", roc_auc_score(y_test_dangerous, y_hat_dangerous_from_regression))
-            print("Regression based dangerous, F1 macro: ", f1_score(y_test_dangerous, y_hat_dangerous_from_regression))
-            print("Regression based scenarios, Confusion Matrix:\n ", confusion_matrix(y_test_scenarios, y_hat_scenario_from_regression))
-            print("Regression based dangerous, Confusion Matrix:\n ", confusion_matrix(y_test_scenarios, y_hat_dangerous_from_regression))
+            print("Dangerous, Accuracy:", accuracy_score(y_test_dangerous, y_hat_dangerous_from_regression))
+            print("Dangerous, AUC:", roc_auc_score(y_test_dangerous, y_hat_dangerous_from_regression))
+            print("Dangerous, F1 macro: ", f1_score(y_test_dangerous, y_hat_dangerous_from_regression, average = 'macro'))
+            print("Scenarios, Confusion Matrix:\n", confusion_matrix(y_test_scenarios, y_hat_scenario_from_regression))
+            print("Dangerous, Confusion Matrix:\n", confusion_matrix(y_test_scenarios, y_hat_dangerous_from_regression))
 
         if args.classification:
             print("\nClassification Based Scores:")
-            print("Classification based scenarios, Accuracy: ", lnr_scenarios.score(X_test, y_test_scenarios, criterion='misclassification'))
-            print("Classification based scenarios, F1 macro: ", f1_score(y_test_scenarios, lnr_scenarios.predict(X_test), average = 'macro'))
-            print("Classification based dangerous, Accuracy: ", lnr_dangerous.score(X_test, y_test_dangerous, criterion='misclassification'))
-            print("Classification based dangerous, AUC: ", lnr_dangerous.score(X_test, y_test_dangerous, criterion='auc'))
-            print("Classification based dangerous, F1 macro: ", f1_score(y_test_dangerous, lnr_dangerous.predict(X_test), average = 'macro'))
-            print("Classification based scenarios, Confusion Matrix:\n ", confusion_matrix(y_test_scenarios, lnr_scenarios.predict(X_test)))
-            print("Classification based dangerous, Confusion Matrix:\n ", confusion_matrix(y_test_dangerous, lnr_dangerous.predict(X_test)))
+            print("Scenarios, Accuracy: ", lnr_scenarios.score(X_test, y_test_scenarios, criterion='misclassification'))
+            print("Scenarios, F1 macro: ", f1_score(y_test_scenarios, lnr_scenarios.predict(X_test), average = 'macro'))
+            print("Dangerous, Accuracy: ", lnr_dangerous.score(X_test, y_test_dangerous, criterion='misclassification'))
+            print("Dangerous, AUC: ", lnr_dangerous.score(X_test, y_test_dangerous, criterion='auc'))
+            print("Dangerous, F1 macro: ", f1_score(y_test_dangerous, lnr_dangerous.predict(X_test), average = 'macro'))
+            print("Scenarios, Confusion Matrix:\n", confusion_matrix(y_test_scenarios, lnr_scenarios.predict(X_test)))
+            print("Dangerous, Confusion Matrix:\n", confusion_matrix(y_test_dangerous, lnr_dangerous.predict(X_test)))
 
 
 if __name__ == "__main__":
