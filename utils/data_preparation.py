@@ -21,7 +21,7 @@ def prepare_measurement():
     df= smooth_wind_dir(df)
     df= hourly_avg(df)
     df = generate_season(df)
-    df = generate_scenario(df)
+    #df = generate_scenario(df)
     #these features are not used
     # df = generate_daily(df)
     # df = generate_am_pm(df)
