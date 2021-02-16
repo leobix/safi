@@ -223,6 +223,7 @@ def main(args):
             grid_scenarios_autobalance = iai.GridSearch(
                 iai.OptimalTreeClassifier(
                     random_seed=1,
+                    criterion=args.class_criterion
                 ),
                 max_depth=range(args.min_depth, args.max_depth),
             )
@@ -230,6 +231,7 @@ def main(args):
             grid_dangerous_autobalance = iai.GridSearch(
                 iai.OptimalTreeClassifier(
                     random_seed=1,
+                    criterion=args.class_criterion
                 ),
                 max_depth=range(args.min_depth, args.max_depth),
             )
