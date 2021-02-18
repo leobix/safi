@@ -1,12 +1,12 @@
 import numpy as np
 
 def get_angle_in_degree(cos, sin):
-    #check if cos within reasonable range: 
-    if (cos>=-1) & (cos <=1): 
+    #check if cos within reasonable range:
+    if (cos>=-1) & (cos <=1):
         angle = 360 * np.arccos(cos) / (2*np.pi)
         if sin < 0:
             angle = 360 - angle
-    #check if sin within reasonable range:       
+    #check if sin within reasonable range:
     elif (sin>=-1) & (sin <=1):
         angle = 360 * np.arcsin(sin) / (2*np.pi)
         if cos < 0:
@@ -14,8 +14,8 @@ def get_angle_in_degree(cos, sin):
         if angle < 0:
             angle += 360
     else:
-        angle=0 
-        print('cos and sin out of range, returned 0')
+        angle=0
+        # print('cos and sin out of range, returned 0')
     #because we care about the reverse angle for the scenarios
     return angle #(angle + 180) % 360
 
@@ -102,8 +102,8 @@ def get_scenario(speed, cos, sin, b_scenarios):
         return 3 + 2*b_scenarios
     elif is_S4(speed, cos, sin):
         return 4 + 2*b_scenarios
-    print("There is a problem.")
-    print("speed: ", speed, " cos: ", cos, " sin: ", sin)
+    # print("There is a problem.")
+    # print("speed: ", speed, " cos: ", cos, " sin: ", sin)
 
 def get_dangerous_scenario(speed, cos, sin):
     if is_S1(speed, cos, sin):
@@ -118,8 +118,8 @@ def get_dangerous_scenario(speed, cos, sin):
         return 1
     elif is_S4(speed, cos, sin):
         return 1
-    print("There is a problem.")
-    print("speed: ", speed, " cos: ", cos, " sin: ", sin)
+    # print("There is a problem.")
+    # print("speed: ", speed, " cos: ", cos, " sin: ", sin)
 
 
 def get_all_scenarios(y_speed, y_cos, y_sin, b_scenarios = False):

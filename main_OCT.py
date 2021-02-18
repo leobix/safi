@@ -75,6 +75,7 @@ def main(args):
     x_df, y_df, x, y_speed = proc.prepare_x_y(measurement, forecast, steps_in, steps_out, 'speed')
     _, _, _, y_cos = proc.prepare_x_y(measurement, forecast, steps_in, steps_out, 'cos_wind_dir')
     _, _, _, y_sin = proc.prepare_x_y(measurement, forecast, steps_in, steps_out, 'sin_wind_dir')
+    # _, _, _, y_dangerous = proc.prepare_x_y(measurement, forecast, steps_in, steps_out, 'dangerous')
     y_scenarios = get_all_scenarios(np.array(y_speed), np.array(y_cos), np.array(y_sin), b_scenarios=True)
     y_dangerous = get_all_dangerous_scenarios(np.array(y_speed), np.array(y_cos), np.array(y_sin))
     X_train, X_test, y_train_dangerous, y_test_dangerous = train_test_split(x, y_dangerous, test_size=0.2,

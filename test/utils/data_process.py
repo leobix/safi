@@ -92,6 +92,50 @@ def smooth_day_hour(df):
     df['cos_hour'] =  np.cos(2 * np.pi * df['present_time'].dt.hour / 24)
     return df
 
+#prepare processed data into same format as training df 
+def prepare_x_test(measurement, forecast, past_n_steps, pred_period):
+    #concat past n steps from measurement 
+    df = measurement.set_index('datetime')
+    #drop am feature
+#     df = df.drop(['am'], axis=1)
+    df= get_past_n_steps(df, past_n_steps)
+    #calculate forecast_time
+    df['forecast_time'] = df['present_time']+timedelta(hours=pred_period)
+
+    #join forecast according to forecast time 
+    forecast = forecast.set_index('f_date') 
+    forecast = forecast.add_suffix('_forecast')
+    df = pd.merge(df, forecast, how = 'left', left_on = 'forecast_time', right_on ='f_date')
+    #add cos day
+    df = smooth_day_hour(df)
+    #fillna
+    df.fillna(value=0, inplace=True)
+    df = df.iloc[:-past_n_steps]
+    #keep the latest information
+    df_out = df.iloc[-1:]
+    return df_out
+
+
+def get_angle_in_degree(cos, sin):
+    #check if cos within reasonable range: 
+    if (cos>=-1) & (cos <=1): 
+        angle = 360 * np.arccos(cos) / (2*np.pi)
+        if sin < 0:
+            angle = 360 - angle
+    #check if sin within reasonable range:       
+    elif (sin>=-1) & (sin <=1):
+        angle = 360 * np.arcsin(sin) / (2*np.pi)
+        if cos < 0:
+            angle = 180 - angle
+        if angle < 0:
+            angle += 360
+    else:
+        angle=0 
+        #print('cos and sin out of range, returned 0')
+    #because we care about the reverse angle for the scenarios
+    return angle #(angle + 180) % 360
+
+
 #change x,y to array like
 def drop_timestamps(x_df, y_df):
     #drop timestamp columns

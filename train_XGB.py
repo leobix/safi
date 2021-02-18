@@ -1,7 +1,13 @@
 import pandas as pd
 import numpy as np
-from xgboost import XGBRegressor
-from datetime import timedelta
+# from sklearn.model_selection import train_test_split
+from sklearn.metrics import roc_auc_score, accuracy_score, balanced_accuracy_score
+from xgboost import XGBRegressor, XGBClassifier
+from sklearn.model_selection import StratifiedKFold, GridSearchCV, KFold
+from imblearn.over_sampling import SMOTE
+
+
+# from datetime import timedelta
 import pickle
 import warnings
 warnings.filterwarnings('ignore')
@@ -16,30 +22,56 @@ parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFo
 parser.add_argument("--steps-in", type=int, default=48,
                             help="number of in time steps")
 
-parser.add_argument("--t_list", type=int, nargs="+", default=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48],
+parser.add_argument("--t_list", type=int, nargs="+", default=[1,2,3,4,5,6],
                             help="list of prediction time steps")
 
 # main function to train xgb models and save models as pickle files
 def train_xgb(measurement, forecast, steps_in, steps_out):
-
+    #flag message
+    print('running xgb for steps_out=', steps_out)
     #Parameter list:
-    param_list =['speed','cos_wind_dir','sin_wind_dir']
-
-    predict = pd.DataFrame(columns={'speed','cos_wind_dir','sin_wind_dir'})
-    true = pd.DataFrame(columns={'speed','cos_wind_dir','sin_wind_dir'})
-    baseline = pd.DataFrame(columns={'speed','cos_wind_dir','sin_wind_dir'})
+    param_list = ['scenario','dangerous'] #['speed','cos_wind_dir','sin_wind_dir','scenario','dangerous']
 
     for param in param_list:
+        print(param)
         #train on the entire data
         x_df, y_df, x, y = proc.prepare_x_y(measurement, forecast, steps_in, steps_out, param)
-        xgb = XGBRegressor(max_depth = 5)
-        xgb.fit(x, y)
+
+        #gridsearch
+        if param in ['speed','cos_wind_dir','sin_wind_dir']:
+            xgb_model = XGBRegressor()
+            splitter = KFold(n_splits=4, shuffle=True)
+            score = 'neg_mean_absolute_error'
+
+        if param in ['scenario', 'dangerous']:
+            xgb_model = XGBClassifier()
+            splitter = StratifiedKFold(n_splits=4, shuffle = True)
+            score = 'accuracy'
+
+            if (param == 'dangerous'):
+                sm = SMOTE(sampling_strategy = 0.6, random_state=0)
+                x, y = sm.fit_resample(x, y)
+                score = 'roc_auc'
+
+        grid = GridSearchCV(xgb_model,
+                            param_grid = grid_params, scoring = score,
+                            cv = splitter.split(x, y))
+        grid.fit(x, y)
+        best_model = grid.best_estimator_
+
+        #print grid parameters
+        print('gridsearch result for param: ', param )
+        print(grid.best_params_)
+
         #save model into a pickle file
-        pickle.dump(xgb, open('trained_models/'+str(param)+'_t_'+str(steps_out), 'wb'))
+        pickle.dump(best_model, open('trained_models/'+str(param)+'_t_'+str(steps_out), 'wb'))
     return
 
 
+
+
 if __name__ == "__main__":
+    print('running train_xgb')
     args = parser.parse_args()
     print(args)
 
@@ -48,14 +80,27 @@ if __name__ == "__main__":
     forecast = prep.prepare_forecast()
 
     #keep selected features
-    measurement= measurement[['speed', 'cos_wind_dir', 'sin_wind_dir', 'temp', 'radiation', 'precip','season']]
+    measurement= measurement[['speed', 'cos_wind_dir', 'sin_wind_dir',
+    'temp', 'radiation', 'precip','season','scenario','dangerous']]
+
     print('measurement features used to construct x_df:', measurement.columns.to_list())
+
+    # small sample size
+    # measurement = measurement.iloc[:6000, :]
 
     #prediction steps
     t_list= args.t_list # np.arange(1,49,1)
     steps_in = args.steps_in #48
 
-    #run three models per prediction step
+    #parameter search space
+    grid_params = {
+         'max_depth':[4,5,6],
+         'min_child_weight':[6],
+         'gamma': [0, 0.05],
+         'learning_rate': [0.1],
+         'n_estimators': [100, 150]}
+
+    #run models per prediction step
     for t in t_list:
         #run model and save model
         train_xgb(measurement, forecast, steps_in, t)
