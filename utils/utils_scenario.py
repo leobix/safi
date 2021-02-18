@@ -15,7 +15,13 @@ def get_angle_in_degree(cos, sin):
             angle += 360
     else:
         angle=0
+<<<<<<< HEAD
         # print('cos and sin out of range, returned 0')
+=======
+        print("cos", cos)
+        print(sin)
+        print('cos and sin out of range, returned 0')
+>>>>>>> d7703fd6a25721e60c6278bad4301253322f1914
     #because we care about the reverse angle for the scenarios
     return angle #(angle + 180) % 360
 
