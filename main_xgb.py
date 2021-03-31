@@ -181,8 +181,8 @@ if __name__ == "__main__":
         # base_dangerous= metrics.roc_auc_score(true['dangerous'],base['dangerous']).round(3)
 
         #do confusion matrix:
-        pred_dangerous_from_scenario = binary_accuracy_from_scenario(predict, true)
-        print('binary from direct, confusion matrix', metrics.confusion_matrix(true['dangerous'], predict['dangerous']))
+        # pred_dangerous_from_scenario = binary_accuracy_from_scenario(predict, true)
+        # print('binary from direct, confusion matrix', metrics.confusion_matrix(true['dangerous'], predict['dangerous']))
 
     #     #record accuracy
     #     accuracy = accuracy.append({'past_n_steps': str(steps_in),
@@ -210,9 +210,9 @@ if __name__ == "__main__":
     #
     # #output results df
     # accuracy.to_csv('results/xgboost_accuracy_gridsearch_'+str(t)+'.csv', index=False)
-    predict_train = predict_train[['dangerous','dangerous_proba','dangerous_indirect','true','baseline']]
+    # predict_train = predict_train[['dangerous','dangerous_proba','dangerous_indirect','true','baseline']]
     predict_train.to_csv('results/xgboost_result_train_'+str(t)+'.csv', index=False)
-    predict_test = predict_test[['dangerous','dangerous_proba','dangerous_indirect','true','baseline']]
+    # predict_test = predict_test[['dangerous','dangerous_proba','dangerous_indirect','true','baseline']]
     predict_test.to_csv('results/xgboost_result_test_'+str(t)+'.csv', index=False)
 
     # pred_angle.to_csv('results/xgboost_pred_angle_in_' + str(args.steps_in) + '_depth_' + str(args.max_depth) + '_estim_' + str(args.n_estimators) + '.csv', index=False)
