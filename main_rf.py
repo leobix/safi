@@ -2,7 +2,9 @@ import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn import metrics
-from xgboost import XGBRegressor, XGBClassifier
+# from xgboost import XGBRegressor, XGBClassifier
+from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
+
 from sklearn.model_selection import StratifiedKFold, GridSearchCV, KFold
 from imblearn.over_sampling import SMOTE
 
@@ -22,9 +24,9 @@ parser.add_argument("--steps-in", type=int, default=48,
 parser.add_argument("--t_list", type=int, nargs="+", default=[1,2,3], #4,5,6
                             help="list of prediction time steps")
 
-def run_xgb(steps_in, steps_out):
+def run_rf(steps_in, steps_out):
     #flag message
-    print('running xgb for steps_out=', steps_out)
+    print('running random forrest for steps_out=', steps_out)
     #Parameter list:
     param_list=['scenario','dangerous','speed','cos_wind_dir','sin_wind_dir'] #['scenario','dangerous'] #
 
@@ -39,12 +41,12 @@ def run_xgb(steps_in, steps_out):
 
         #gridsearch
         if param in ['speed','cos_wind_dir','sin_wind_dir']:
-            xgb_model = XGBRegressor()
+            rf_model = RandomForestRegressor()
             splitter = KFold(n_splits=4, shuffle=True)
             score = 'neg_mean_absolute_error' #MAE
 
         if param in ['scenario', 'dangerous']:
-            xgb_model = XGBClassifier()
+            rf_model = RandomForestClassifier()
             splitter = StratifiedKFold(n_splits=4, shuffle = True)
             score = 'accuracy'
             # SMOTE for binary classification
@@ -53,7 +55,7 @@ def run_xgb(steps_in, steps_out):
                 x_train, y_train = sm.fit_resample(x_train, y_train)
                 score = 'roc_auc'
 
-        grid = GridSearchCV(xgb_model,
+        grid = GridSearchCV(rf_model,
                             param_grid = grid_params, scoring = score,
                             cv = splitter.split(x_train, y_train))
         grid.fit(x_train, y_train)
@@ -77,15 +79,6 @@ def run_xgb(steps_in, steps_out):
             predict_test['baseline'] = x_df['dangerous_forecast'][-len(y_test):]
             predict_train['baseline'] = x_df['dangerous_forecast'][:len(y_train)]
 
-        #print(np.array(y_test).reshape(-1))
-        # true[param] = pd.Series(np.array(y_test).reshape(-1))#y_test.flatten())
-        # baseline[param] = x_df[param+'_forecast'][-len(y_hat):]
-
-
-    # baseline[param] = x_df[param+'_forecast'][-len(y_hat):].reset_index(inplace=True)
-
-    #reset index
-    # baseline.reset_index(inplace=True)
     return predict_train, predict_test #, true, baseline
 
 def scenario_accuracy_indirect(predict, true):
@@ -143,20 +136,18 @@ if __name__ == "__main__":
 
     steps_in = args.steps_in
 
-    #parameter search space
     grid_params = {
-         'max_depth':[4,5],
-         'min_child_weight':[6],
-         'gamma': [0, 0.05],
-         'learning_rate': [0.1],
-         'n_estimators': [100, 150]}
+        'bootstrap': [True, False],
+         'max_depth': [4,5,6],
+         'min_samples_leaf': [1, 2, 4],
+         'min_samples_split': [2, 4, 6 ],
+         'n_estimators': [100, 200]}
 
-    # predict_train, predict_test = run_xgb(steps_in=1, steps_out=1)
-
+    # predict_train, predict_test = run_rf(steps_in=1, steps_out=1)
 
     for t in t_list:
         #run model
-        predict_train, predict_test= run_xgb(steps_in, steps_out=t)
+        predict_train, predict_test= run_rf(steps_in, steps_out=t)
 
         # #calculate angles from sin and cosine
         # predict['angle'] = predict.apply(lambda row: utils.get_angle_in_degree(row['cos_wind_dir'],row['sin_wind_dir']),axis = 1)
@@ -211,9 +202,9 @@ if __name__ == "__main__":
     # #output results df
     # accuracy.to_csv('results/xgboost_accuracy_gridsearch_'+str(t)+'.csv', index=False)
     predict_train = predict_train[['dangerous','dangerous_proba','dangerous_indirect','true','baseline']]
-    predict_train.to_csv('results/xgboost_result_train_'+str(t)+'.csv', index=False)
+    predict_train.to_csv('results/rf_result_train_'+str(t)+'.csv', index=False)
     predict_test = predict_test[['dangerous','dangerous_proba','dangerous_indirect','true','baseline']]
-    predict_test.to_csv('results/xgboost_result_test_'+str(t)+'.csv', index=False)
+    predict_test.to_csv('results/rf_result_test_'+str(t)+'.csv', index=False)
 
     # pred_angle.to_csv('results/xgboost_pred_angle_in_' + str(args.steps_in) + '_depth_' + str(args.max_depth) + '_estim_' + str(args.n_estimators) + '.csv', index=False)
     # pred_speed.to_csv('results/xgboost_pred_speed_in_' + str(args.steps_in) + '_depth_' + str(args.max_depth) + '_estim_' + str(args.n_estimators) + '.csv', index=False)
