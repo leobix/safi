@@ -4,7 +4,7 @@ from sklearn.model_selection import train_test_split
 from sklearn import metrics
 # from xgboost import XGBRegressor, XGBClassifier
 from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
-
+import pickle
 from sklearn.model_selection import StratifiedKFold, GridSearchCV, KFold
 from imblearn.over_sampling import SMOTE
 
@@ -32,8 +32,6 @@ def run_rf(steps_in, steps_out):
 
     predict_test = pd.DataFrame(columns={'speed','cos_wind_dir','sin_wind_dir','scenario','dangerous','dangerous_proba'})
     predict_train = pd.DataFrame(columns={'speed','cos_wind_dir','sin_wind_dir','scenario','dangerous','dangerous_proba'})
-    # true = pd.DataFrame(columns={'speed','cos_wind_dir','sin_wind_dir','scenario','dangerous'})
-    # baseline = pd.DataFrame(columns={'speed','cos_wind_dir','sin_wind_dir','scenario','dangerous'})
 
     for param in param_list:
         x_df, y_df, x, y = proc.prepare_x_y(measurement, forecast, steps_in, steps_out, param)
@@ -63,6 +61,8 @@ def run_rf(steps_in, steps_out):
         print('gridsearch result for param: ', param )
         print(grid.best_params_)
 
+        #save best parameters:
+        pickle.dump(grid.best_params_, open('results/params/rf_'+param+'_'+str(steps_out)+'.pkl', 'wb'))
         best_model = grid.best_estimator_
 
         #record results
@@ -81,42 +81,42 @@ def run_rf(steps_in, steps_out):
 
     return predict_train, predict_test #, true, baseline
 
-def scenario_accuracy_indirect(predict, true):
-    pred = utils.get_all_scenarios(predict['speed'], predict['cos_wind_dir'],predict['sin_wind_dir'], b_scenarios=True)
-    true = utils.get_all_scenarios(true['speed'], true['cos_wind_dir'],true['sin_wind_dir'], b_scenarios=True)
-
-    #calculate prediction accuracies
-    pred_score = metrics.accuracy_score(true, pred).round(3)
-    return  pred_score
-
-
-def binary_accuracy_indirect(predict, true):
-    pred = utils.get_all_dangerous_scenarios(predict['speed'], predict['cos_wind_dir'],predict['sin_wind_dir'])
-    true = utils.get_all_dangerous_scenarios(true['speed'], true['cos_wind_dir'],true['sin_wind_dir'])
-    pred_auc = metrics.roc_auc_score(true,pred).round(3)
-    return  pred_auc #, base_auc, pred_score, base_score,
-
-#dangerous vs. not dangerous classification
-def binary_accuracy_from_scenario(predict, true, b_scenarios =True):
-    if b_scenarios:
-        pred = predict['scenario'].apply(lambda x: 0 if (x<=3) else 1)
-    else:
-        print('no b scnenario')
-    pred_auc = metrics.roc_auc_score(true['dangerous'],pred).round(3)
-    print('binary from scenario, confusion matrix', metrics.confusion_matrix(true['dangerous'], pred ))
-    return pred_auc
-
-def get_mae_indirect(predict, true, baseline):
-    speed = metrics.mean_absolute_error( true['speed'], predict['speed'])
-    speed_base=metrics.mean_absolute_error(true['speed'], baseline['speed'])
-    angle = metrics.mean_absolute_error( true['angle'],predict['angle'])
-    angle_base=metrics.mean_absolute_error( true['angle'], baseline['angle'])
-    return speed, speed_base, angle, angle_base
-
+# def scenario_accuracy_indirect(predict, true):
+#     pred = utils.get_all_scenarios(predict['speed'], predict['cos_wind_dir'],predict['sin_wind_dir'], b_scenarios=True)
+#     true = utils.get_all_scenarios(true['speed'], true['cos_wind_dir'],true['sin_wind_dir'], b_scenarios=True)
+#
+#     #calculate prediction accuracies
+#     pred_score = metrics.accuracy_score(true, pred).round(3)
+#     return  pred_score
+#
+#
+# def binary_accuracy_indirect(predict, true):
+#     pred = utils.get_all_dangerous_scenarios(predict['speed'], predict['cos_wind_dir'],predict['sin_wind_dir'])
+#     true = utils.get_all_dangerous_scenarios(true['speed'], true['cos_wind_dir'],true['sin_wind_dir'])
+#     pred_auc = metrics.roc_auc_score(true,pred).round(3)
+#     return  pred_auc #, base_auc, pred_score, base_score,
+#
+# #dangerous vs. not dangerous classification
+# def binary_accuracy_from_scenario(predict, true, b_scenarios =True):
+#     if b_scenarios:
+#         pred = predict['scenario'].apply(lambda x: 0 if (x<=3) else 1)
+#     else:
+#         print('no b scnenario')
+#     pred_auc = metrics.roc_auc_score(true['dangerous'],pred).round(3)
+#     print('binary from scenario, confusion matrix', metrics.confusion_matrix(true['dangerous'], pred ))
+#     return pred_auc
+#
+# def get_mae_indirect(predict, true, baseline):
+#     speed = metrics.mean_absolute_error( true['speed'], predict['speed'])
+#     speed_base=metrics.mean_absolute_error(true['speed'], baseline['speed'])
+#     angle = metrics.mean_absolute_error( true['angle'],predict['angle'])
+#     angle_base=metrics.mean_absolute_error( true['angle'], baseline['angle'])
+#     return speed, speed_base, angle, angle_base
+#
 
 
 if __name__ == "__main__":
-    print('running main_xgb')
+    print('running main_rf')
     args = parser.parse_args()
     print(args)
 
@@ -139,7 +139,6 @@ if __name__ == "__main__":
     grid_params = {
         'bootstrap': [True, False],
          'max_depth': [5,6],
-         'min_samples_leaf': [1, 2],
          'min_samples_split': [4, 6],
          'n_estimators': [100, 150]}
 
@@ -156,6 +155,10 @@ if __name__ == "__main__":
 
         predict_train['dangerous_indirect'] = utils.get_all_dangerous_scenarios(predict_train['speed'], predict_train['cos_wind_dir'],predict_train['sin_wind_dir'])
         predict_test['dangerous_indirect'] = utils.get_all_dangerous_scenarios(predict_test['speed'], predict_test['cos_wind_dir'],predict_test['sin_wind_dir'])
+
+        predict_train.to_csv('results/rf_result_train_'+str(t)+'.csv', index=False)
+        predict_test.to_csv('results/rf_result_test_'+str(t)+'.csv', index=False)
+
 
         # # #calculate mae for regression
         # mae_speed, mae_speed_base, mae_angle, mae_angle_base = get_mae_indirect(predict, true, base)
@@ -202,9 +205,9 @@ if __name__ == "__main__":
     # #output results df
     # accuracy.to_csv('results/xgboost_accuracy_gridsearch_'+str(t)+'.csv', index=False)
     # predict_train = predict_train[['dangerous','dangerous_proba','dangerous_indirect','true','baseline']]
-    predict_train.to_csv('results/rf_result_train_'+str(t)+'.csv', index=False)
+
     # predict_test = predict_test[['dangerous','dangerous_proba','dangerous_indirect','true','baseline']]
-    predict_test.to_csv('results/rf_result_test_'+str(t)+'.csv', index=False)
+
 
     # pred_angle.to_csv('results/xgboost_pred_angle_in_' + str(args.steps_in) + '_depth_' + str(args.max_depth) + '_estim_' + str(args.n_estimators) + '.csv', index=False)
     # pred_speed.to_csv('results/xgboost_pred_speed_in_' + str(args.steps_in) + '_depth_' + str(args.max_depth) + '_estim_' + str(args.n_estimators) + '.csv', index=False)
