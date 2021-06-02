@@ -2,7 +2,8 @@ import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn import metrics
-from xgboost import XGBRegressor, XGBClassifier
+# from xgboost import XGBRegressor, XGBClassifier
+from sklearn.neural_network import MLPRegressor, MLPClassifier
 from sklearn.model_selection import StratifiedKFold, GridSearchCV, KFold
 from imblearn.over_sampling import SMOTE
 import pickle
@@ -24,7 +25,7 @@ parser.add_argument("--t_list", type=int, nargs="+", default=[1,2,3], #4,5,6
 
 def run_xgb(steps_in, steps_out):
     #flag message
-    print('running xgb for steps_out=', steps_out)
+    print('running mlp for steps_out=', steps_out)
     #Parameter list:
     param_list=['scenario','dangerous','speed','cos_wind_dir','sin_wind_dir'] #['scenario','dangerous'] #
 
@@ -39,12 +40,12 @@ def run_xgb(steps_in, steps_out):
 
         #gridsearch
         if param in ['speed','cos_wind_dir','sin_wind_dir']:
-            xgb_model = XGBRegressor()
+            model = MLPRegressor()
             splitter = KFold(n_splits=4, shuffle=True)
             score = 'neg_mean_absolute_error' #MAE
 
         if param in ['scenario', 'dangerous']:
-            xgb_model = XGBClassifier()
+            model = MLPClassifier()
             splitter = StratifiedKFold(n_splits=4, shuffle = True)
             score = 'accuracy'
             # SMOTE for binary classification
@@ -53,7 +54,7 @@ def run_xgb(steps_in, steps_out):
                 x_train, y_train = sm.fit_resample(x_train, y_train)
                 score = 'roc_auc'
 
-        grid = GridSearchCV(xgb_model,
+        grid = GridSearchCV(model,
                             param_grid = grid_params, scoring = score,
                             cv = splitter.split(x_train, y_train))
         grid.fit(x_train, y_train)
@@ -62,7 +63,7 @@ def run_xgb(steps_in, steps_out):
         print(grid.best_params_)
 
         #save best parameters:
-        pickle.dump(grid.best_params_, open('results/params/xgb_'+param+'_'+str(steps_out)+'.pkl', 'wb'))
+        pickle.dump(grid.best_params_, open('results/params/mlp_'+param+'_'+str(steps_out)+'.pkl', 'wb'))
         best_model = grid.best_estimator_
 
         #load parameters:
@@ -71,7 +72,7 @@ def run_xgb(steps_in, steps_out):
         # model.set_params(**params)
 
         #save model into a pickle file
-        pickle.dump(best_model, open('results/trained_models/xgb_'+str(param)+'_'+str(steps_out)+'.pkl', 'wb'))
+        pickle.dump(best_model, open('results/trained_models/mlp_'+str(param)+'_'+str(steps_out)+'.pkl', 'wb'))
 
         #record results
         predict_test[param] = pd.Series(best_model.predict(x_test))
@@ -133,7 +134,7 @@ def get_mae_indirect(predict, true, baseline):
 
 
 if __name__ == "__main__":
-    print('running main_xgb')
+    print('running main_mlp')
     args = parser.parse_args()
     print(args)
 
@@ -155,11 +156,8 @@ if __name__ == "__main__":
 
     #parameter search space
     grid_params = {
-         'max_depth':[4,5],
-         'min_child_weight':[6],
-         'gamma': [0, 0.05],
-         'learning_rate': [0.1],
-         'n_estimators': [100, 150]}
+         'hidden_layer_sizes':[(150,100)],
+         'solver':['adam','sgd']}
 
     # predict_train, predict_test = run_xgb(steps_in=1, steps_out=1)
 
@@ -178,9 +176,9 @@ if __name__ == "__main__":
 
 
         # predict_train = predict_train[['dangerous','dangerous_proba','dangerous_indirect','true','baseline']]
-        predict_train.to_csv('results/xgboost_result_train_'+str(t)+'.csv', index=False)
+        predict_train.to_csv('results/mlp_result_train_'+str(t)+'.csv', index=False)
         # predict_test = predict_test[['dangerous','dangerous_proba','dangerous_indirect','true','baseline']]
-        predict_test.to_csv('results/xgboost_result_test_'+str(t)+'.csv', index=False)
+        predict_test.to_csv('results/mlp_result_test_'+str(t)+'.csv', index=False)
 
         # # #calculate mae for regression
         # mae_speed, mae_speed_base, mae_angle, mae_angle_base = get_mae_indirect(predict, true, base)

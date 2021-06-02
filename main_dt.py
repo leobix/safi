@@ -65,6 +65,9 @@ def run_dt(steps_in, steps_out):
         pickle.dump(grid.best_params_, open('results/params/dt_'+param+'_'+str(steps_out)+'.pkl', 'wb'))
         best_model = grid.best_estimator_
 
+        #save model into a pickle file
+        pickle.dump(best_model, open('results/trained_models/dt_'+str(param)+'_'+str(steps_out)+'.pkl', 'wb'))
+
         #record results
         predict_test[param] = pd.Series(best_model.predict(x_test))
         predict_train[param] = pd.Series(best_model.predict(x_train))
@@ -137,9 +140,9 @@ if __name__ == "__main__":
     steps_in = args.steps_in
 
     grid_params = {
-        'max_depth': [4,6,8],
+        'max_depth': [7,8,9,10],
          'min_samples_split': [3,5,7],
-         'min_samples_leaf': [2,4,6]}
+         'min_samples_leaf': [4,6]}
 
     # predict_train, predict_test = run_dt(steps_in=1, steps_out=1)
 

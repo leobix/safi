@@ -65,6 +65,9 @@ def run_rf(steps_in, steps_out):
         pickle.dump(grid.best_params_, open('results/params/rf_'+param+'_'+str(steps_out)+'.pkl', 'wb'))
         best_model = grid.best_estimator_
 
+        #save model into a pickle file
+        pickle.dump(best_model, open('results/trained_models/rf_'+str(param)+'_'+str(steps_out)+'.pkl', 'wb'))
+
         #record results
         predict_test[param] = pd.Series(best_model.predict(x_test))
         predict_train[param] = pd.Series(best_model.predict(x_train))
