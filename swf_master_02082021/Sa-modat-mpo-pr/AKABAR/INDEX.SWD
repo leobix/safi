@@ -1,0 +1,8 @@
+SRD	Solar Rad (wat/m2)	
+HMD	RH (%)	
+TMP	Temperature (*C)	
+RNF	Rainfall (mm)	
+WND	Wind Dir (Deg)	
+WNG	Wind Gust (km/h)	
+WNS	Wind Speed (km/h)	
+DEW	Dew Point (*C)	

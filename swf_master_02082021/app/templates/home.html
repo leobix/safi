@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+ 
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <title>Safi Weather Forecast</title>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <img class="navbar-brand" src="/static/OCP-logo.png" style="width: 2%; height: auto; margin-left: 1cm;"/>
+      <img class="navbar-brand mx-10" src="/static/mit-logo.png" style="width: 10%; height: auto; margin-left: 1cm;"/>
+    </nav>
+    <div class="container-fluid">
+      <div class="row mt-5 mx-5">
+        <h1>Predictions</h1>
+        <div class="col-sm-5 mt-5 mx-5">
+          <h3> MIT Model </h3>
+          <table class="table my-3 mx-10">
+            <thead id = "data-model-head">
+            </thead>
+            <tbody id="data-model-body">
+            </tbody>
+          </table> 
+        </div>
+        <div class="col-sm-5 mt-5 mx-5">
+          <h3> Numtech Model </h3>
+          <table class="table mt-3">
+            <thead id = "data-numtech-head">
+            </thead>
+            <tbody id="data-numtech-body">
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class='row my-5 mx-5'>
+        <div class='row my-5'>
+          <div class='col-sm-4'>
+            <h1 id="WeatherStationHeader"> Weather Station (GP2)</h1>
+          </div>
+          <div class='col-sm-3'>      
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault" onchange="getSwitchValue()" style="font-size: xx-large;">
+              <label class="form-check-label" for="flexSwitchCheckDefault" style="font-size: xx-large;">Switch Station</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="row my-3 mx-5">
+          <div class="col-sm-7">
+            <h3 id="Last30minDataHeader"> Last 30 min data (GP2)</h3>
+
+          </div>
+          <div class="col-sm-3">
+            <h3 id="LastDataHeader"> Last Data (GP2)</h3>
+
+          </div>
+        </div>
+
+          <div class="row my-3 mx-5">
+
+            <div class="col-sm-1">            
+              <div id= "data-30-min-left">
+                <table class="table my-2" style="white-space:nowrap;">
+                  <thead id = "data-30-min-head-left">
+                    <tr><th scope="col">Day</th></tr>
+                    <tr><th scope="col">Time</th></tr>
+                  </thead>
+                  <tbody id="data-30-min-body-left">
+                    <tr><td>Air Temperature (deg C)</td></tr>
+                    <tr><td>Wind Direction (deg C))</td></tr>
+                    <tr><td>Wind Direction</td></tr>
+                    <tr><td>Wind Speed (m.s-1))</td></tr>
+                    <tr><td>Precipitation (mm)</td></tr>
+                    <tr><td>Radiation (W.m-2)</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="col-sm-5">
+              <div id= "data-30-min-table" style="overflow-x: scroll;">
+                <table class="table my-2" style="white-space:nowrap;">
+                  <thead id = "data-30-min-head">
+                  </thead>
+                  <tbody id="data-30-min-body">
+                  </tbody>
+                </table>
+              </div>
+           </div>
+           
+           <div class="col-sm-1">
+
+           </div>
+
+           <div class="col-sm-2 ">
+            <table class="table my-2 mx-5">
+              <thead>
+              </thead>
+              <tbody id ="data-last">
+                </tr>
+              </tbody>
+            </table>
+           </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+
+    
+    <script>
+
+      function getSwitchValue(){
+        document.getElementById("data-30-min-body").innerHTML = "";
+        document.getElementById("data-30-min-head").innerHTML = "";
+        document.getElementById("data-last").innerHTML = "";
+
+        var WeatherStation;
+        if (document.getElementById("flexSwitchCheckDefault").checked){
+          WeatherStation = 'akabar';
+          getWeather(WeatherStation);
+          getLast30Min(WeatherStation);
+          document.getElementById("LastDataHeader").innerHTML ='Last Data (Akabar)';
+          document.getElementById("Last30minDataHeader").innerHTML ='Last 30 min Data (Akabar)';
+          document.getElementById("WeatherStationHeader").innerHTML ='Weather Station (Akabar)';
+        }
+        else{
+          WeatherStation = 'gp2';
+          getWeather(WeatherStation);
+          getLast30Min(WeatherStation);
+          document.getElementById("LastDataHeader").innerHTML ='Last Data (GP2)';
+          document.getElementById("Last30minDataHeader").innerHTML ='Last 30 min Data (GP2)';
+          document.getElementById("WeatherStationHeader").innerHTML ='Weather Station (GP2)';
+        }
+        console.log(WeatherStation);
+        return WeatherStation;
+      }
+
+
+      function scrollToRight (id) {
+        var div = document.getElementById(id);
+        div.scrollLeft = div.scrollWidth - div.clientWidth;
+      }
+
+      function getWeather(WeatherStation) {
+       fetch('http://127.0.0.1:5000/data/' + WeatherStation + '_last_row/')
+        .then(response => response.json())
+        .then(data => {
+          const col_b = ["Day",'Time',"Air Temperature (deg C)","Wind Direction (deg C)","Wind Direction","Wind Speed (m.s-1)","Precipitation (mm)","Radiation (W.m-2)"];
+          let col_b_len = col_b.length;
+
+          const dataBody = document.getElementById("data-last");
+          dataBody.innerHTML = "";
+          let htmlText = "";
+          //console.log(data);
+          for (let line in data) {
+            for (let i=0; i < col_b_len ; i++) {
+              console.log(col_b[i]);
+              //console.log(data[line][col]);
+              htmlText += "<tr><td> " + col_b[i] + " : " + data[line][col_b[i]] + "</td> </tr>";
+            }
+          }
+          dataBody.innerHTML = htmlText;
+        })
+      }
+
+      function get_model_result(){
+        fetch('http://127.0.0.1:5001/data/last_results/')
+        .then(response => response.json())
+        .then(data => {
+          const dataHead = document.getElementById("data-model-head");
+          dataHead.innerHTML = "";
+          let htmlText = "";
+          const col_h = ["Day","Time"];
+          let col_h_len = col_h.length;
+          for (let i=0; i < col_h_len ; i++){
+            //console.log(col_h[i]);
+            htmlText += "<tr> <th scope= \"col\"> " + col_h[i] + "</th>";
+            for (let line in data) {
+              htmlText += "<th scope=\"col\">" + data[line][col_h[i]] + "</th>";
+            }
+          htmlText += "</tr>";
+          }    
+          dataHead.innerHTML = htmlText;
+
+          const dataBody = document.getElementById("data-model-body");
+          dataBody.innerHTML = "";
+          let htmlBodyText = "";
+          const col_b = ['Predicted Binary', 'Predicted Scenario', 'Predicted Wind Speed','Predicted Wind Direction'];
+          let col_b_len = col_b.length;
+          for (let i=1; i < col_b_len ; i++){
+            console.log(col_b[i]);
+            htmlBodyText += "<tr> <td> " + col_b[i] + "</td>";
+            for (let line in data) {
+              if (data[line]['Predicted Binary'] == 'Safe'){
+                htmlBodyText += "<td class='bg-success text-white'>" + data[line][col_b[i]] + "</td>";
+              }
+              else {
+                htmlBodyText += "<td class='bg-danger text-white'>" + data[line][col_b[i]] + "</td>";
+              }
+            }
+            htmlBodyText += "</tr>";
+          }    
+          dataBody.innerHTML = htmlBodyText;
+        })
+      }
+
+      function get_numtech_result(){
+        fetch('http://127.0.0.1:5001/data/last_results/')
+        .then(response => response.json())
+        .then(data => {
+          const dataHead = document.getElementById("data-numtech-head");
+          dataHead.innerHTML = "";
+          let htmlText = "";
+          const col_h = ["Day","Time"];
+          let col_h_len = col_h.length;
+          for (let i=0; i < col_h_len ; i++){
+            //console.log(col_h[i]);
+            htmlText += "<tr> <th scope= \"col\"> " + col_h[i] + "</th>";
+            for (let line in data) {
+              htmlText += "<th scope=\"col\">" + data[line][col_h[i]] + "</th>";
+            }
+          htmlText += "</tr>";
+          }    
+          dataHead.innerHTML = htmlText;
+
+          const dataBody = document.getElementById("data-numtech-body");
+          dataBody.innerHTML = "";
+          let htmlBodyText = "";
+          const col_b = ['Numtech Binary', 'Numtech Scenario', 'Numtech Wind Speed','Numtech Wind Direction'];
+          let col_b_len = col_b.length;
+          for (let i=1; i < col_b_len ; i++){
+            console.log(col_b[i]);
+            htmlBodyText += "<tr> <td> " + col_b[i] + "</td>";
+            for (let line in data) {
+              if (data[line]['Numtech Binary'] == 'Safe'){
+                htmlBodyText += "<td class='bg-success text-white'>" + data[line][col_b[i]] + "</td>";
+              }
+              else {
+                htmlBodyText += "<td class='bg-danger text-white'>" + data[line][col_b[i]] + "</td>";
+              }
+            }
+            htmlBodyText += "</tr>";
+          }
+          dataBody.innerHTML = htmlBodyText;
+        })
+      }
+ 
+      function getLast30Min(WeatherStation) {
+        fetch('http://127.0.0.1:5000/data/' + WeatherStation + '_last_30min/')
+        .then(response => response.json())
+        .then(data => {
+
+          const dataHead = document.getElementById("data-30-min-head");
+          dataHead.innerHTML = "";
+          let htmlText = "";
+          const col_h = ["Day","Time"];
+          let col_h_len = col_h.length;
+          for (let i=0; i < col_h_len ; i++){
+            //console.log(col_h[i]);
+            //htmlText += "<tr> <th scope= \"col\"> " + col_h[i] + "</th>";
+            htmlText += "<tr>"
+            for (let line in data) {
+              htmlText += "<th scope=\"col\">" + data[line][col_h[i]] + "</th>";
+            }
+          htmlText += "</tr>";
+          }    
+          dataHead.innerHTML = htmlText;
+
+          const dataBody = document.getElementById("data-30-min-body");
+          dataBody.innerHTML = "";
+          let htmlBodyText = "";
+          const col_b = ["Air Temperature (deg C)","Wind Direction (deg C)","Wind Direction","Wind Speed (m.s-1)","Precipitation (mm)","Radiation (W.m-2)"];
+          let col_b_len = col_b.length;
+          for (let i=0; i < col_b_len ; i++){
+            //console.log(col_b[i]);
+            // htmlBodyText += "<tr> <td> " + col_b[i] + "</td>";
+              htmlBodyText += "<tr>"; 
+            for (let line in data) {
+              if (col_b[i] == "Wind Direction"){
+                htmlBodyText += "<td> <img src='/static/arrows/" + data[line][col_b[i]] + ".png' style='width: 30%; height: auto;'/> </td>";
+              }
+              else {
+              htmlBodyText += "<td>" + data[line][col_b[i]] + "</td>";
+              }
+            }
+            // "<td> <img src='img/" + data[line][col_b[i]] + ".png' /> </td>"
+            htmlBodyText += "</tr>";
+          }    
+          dataBody.innerHTML = htmlBodyText;
+          scrollToRight('data-30-min-table');
+        });
+      }
+ 
+      get_model_result();
+      get_numtech_result();
+      
+      getWeather('gp2');
+      getLast30Min('gp2');
+      //setInterval(getWeather, 60 * 1000);
+      //setInterval(getLast30Min, 60 * 1000);
+      //getSiwtchValue();
+    </script>
+ 
+    <!-- Optional JavaScript; choose one of the two! -->
+ 
+    <!-- Option 1: Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+ 
+    <!-- Option 2: Separate Popper and Bootstrap JS -->
+    <!--
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
+    -->
+  </body>
+</html>
