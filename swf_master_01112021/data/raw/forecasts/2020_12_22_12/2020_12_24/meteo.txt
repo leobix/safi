@@ -1,0 +1,7 @@
+heure;minute;direction;vitesse;temperature;details;scenario;scenario_couleur;rayonnement;precip
+00;00;76;4.4;10.5;DMN;S1;#00FF00;0;0
+01;00;76;4.1;9.4;DMN;S1;#00FF00;0;0
+02;00;77;3.9;8.9;DMN;S1;#00FF00;0;0
+03;00;75;3.6;8.5;DMN;S1;#00FF00;0;0
+04;00;70;3.2;8;DMN;S1;#00FF00;0;0
+05;00;69;3.1;7.4;DMN;S1;#00FF00;0;0
